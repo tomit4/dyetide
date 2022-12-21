@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# set -vx
+
+printhelp() {
+    cat <<EOM
+usage: dyeit [-x|-r] file
+options:
+ -x             replace all hex with rgba in file
+ -r             replace all rgb with hex in file
+examples:
+ dyeit -x file
+ dyeit -r file
+EOM
+    exit 1
+}
+
+error() {
+    printf "error: %s\n" "$1" 1>&2
+    ${2:+exit $2}
+}
+
+dependencycheck() {
+    local dep missingdependencies=0
+    for dep in "$@"; do
+        if ! command -v "$dep" &>/dev/null; then
+            error "dependency not met: $dep"
+        fi
+    done
+    if [[ $missingdependencies -gt 0 ]]; then
+        exit 1
+    fi
+}
+
+# searches through all intances of hex color codes and replaces
+# them with rgba codes
+# replace_all_hex() {
+
+# }
+
+# searches through all intances of rgb/rgba color codes and replaces
+# them with hex codes
+# replace_all_rgb() {
+
+# }
+
+main() {
+    if [[ "$#" -lt 1 ]]; then
+        printhelp
+    fi
+
+    while getopts ":x:r:?" arg; do
+        case $arg in
+            x)
+                # replace_all_hex "$@"
+                printhelp
+                ;;
+            r)
+                # replace_all_rgb "$@"
+                printhelp
+                ;;
+            ?)
+                printhelp
+                ;;
+        esac
+    done
+}
+
+main "$@"

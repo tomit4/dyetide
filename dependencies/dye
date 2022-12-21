@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+# set -vx
+
+printhelp() {
+    cat <<EOM
+usage: dye [-x|-r] [color_code]
+options:
+ -x                  hex to rgb
+ -r                  rgb to hex
+examples:
+ dye -x "#ffffff"
+ dye -r 255 255 255
+ dye -x "#43fF6480"
+ dye -r 67 255 100 0.5
+EOM
+    exit 1
+}
+
+error() {
+    printf "error: %s\n" "$1" 1>&2
+    ${2:+exit $2}
+}
+
+dependencycheck() {
+    local dep missingdependencies=0
+    for dep in "$@"; do
+        if ! command -v "$dep" &>/dev/null; then
+            error "dependency not met: $dep"
+        fi
+    done
+    if [[ $missingdependencies -gt 0 ]]; then
+        exit 1
+    fi
+}
+
+alpha_to_hex() {
+    printf "%02x\n" "$(echo "scale=0; $1*255" | bc)" 2>/dev/null
+}
+
+hex_to_rgb() {
+    local a
+    : "${1/\#/}"
+    if ((${#_} == 8)); then
+        ((r = 16#${_:0:2}, g = 16#${_:2:2}, b = 16#${_:4:2}, a = 16#${_:6:2}))
+        a=$(echo "scale=2; $a / 255" | bc)
+    else
+        ((r = 16#${_:0:2}, g = 16#${_:2:2}, b = 16#${_:4:2}))
+        a=1.0
+    fi
+    printf "%s\n" "rgba($r, $g, $b, $a)"
+}
+
+rgb_to_hex() {
+    local a
+    if [[ "$*" =~ rgb ]]; then
+        set -- "$(tr ',' ' ' <<<"$*" | tr -cd ' 0-9')"
+    fi
+
+    if [[ -n "$4" ]]; then
+        a=$(alpha_to_hex "$4")
+        printf "#%02x%02x%02x%s\n" "$1" "$2" "$3" "$a"
+    else
+        printf "#%02x%02x%02x\n" "$1" "$2" "$3"
+    fi
+}
+
+main() {
+    if [[ "$#" -lt 1 ]]; then
+        printhelp
+    fi
+
+    while getopts ":x:r:?" arg; do
+        case $arg in
+            x)
+                if [[ "$#" -gt 2 ]]; then
+                    error "-x only parses one following argument"
+                    exit 2
+                fi
+                local rgbval clipit
+                rgbval=$(hex_to_rgb "${2:-''}")
+                printf "%s\n" "$rgbval"
+                read -e -r -p "save code to clipboard?(y/n): " clipit
+                if [[ "$clipit" == "yes" || "$clipit" == "y" ]]; then
+                    dependencycheck xclip
+                    printf "%s" "$rgbval" | xclip -sel clip
+                fi
+                ;;
+            r)
+                if [[ "$#" -gt 5 ]]; then
+                    error "-r parses up to four following argument"
+                    exit 2
+                elif [[ "$#" -lt 4 ]]; then
+                    error "-r parses no less than three arguments"
+                    exit 2
+                fi
+                local hexval clipit
+                hexval=$(rgb_to_hex "${@:2}")
+                printf "%s\n" "$hexval"
+                read -e -r -p "save code to clipboard?(y/n): " clipit
+                if [[ "$clipit" == "yes" || "$clipit" == "y" ]]; then
+                    dependencycheck xclip
+                    printf "%s" "$hexval" | xclip -sel clip
+                fi
+                ;;
+            ?)
+                printhelp
+                ;;
+        esac
+    done
+}
+
+main "$@"
+
+# Credits:
+# hex_to_rgb() and rgb_to_hex() taken from Akash Mittal:
+# https://akashmittal.com/code-example-convert-hex-color-to-rgb-rgb-to-hex-using-bash-script/
+
+# Both users zeekar and DyslexicHobo on reddit for their help:
+# https://reddit.com/r/bash/comments/zqmvz8/rgbhex_converter_syntax_how_does_this_work/
+# And yeah, I also used ChatGPT:
+# https://openai.com/blog/chatgpt/
