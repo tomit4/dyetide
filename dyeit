@@ -33,9 +33,12 @@ dependencycheck() {
 
 # searches through all intances of hex color codes and replaces
 # them with rgba codes
-# replace_all_hex() {
-
-# }
+replace_all_hex() {
+    # filename="${2}"
+    # grep "#" "${filename}"
+    regex='^#[0-9a-fA-F]{6,8}$'
+    [[ $1 =~ $regex ]] && echo "matched" || echo "did not match"
+}
 
 # searches through all intances of rgb/rgba color codes and replaces
 # them with hex codes
@@ -51,8 +54,7 @@ main() {
     while getopts ":x:r:?" arg; do
         case $arg in
             x)
-                # replace_all_hex "$@"
-                printhelp
+                replace_all_hex "$@"
                 ;;
             r)
                 # replace_all_rgb "$@"
