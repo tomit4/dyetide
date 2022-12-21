@@ -33,16 +33,17 @@ dependencycheck() {
     fi
 }
 
-alpha_to_hex() {
-    printf "%02x\n" "$(echo "scale=0; $1*255" | bc)" 2>/dev/null
-}
-
 hex_to_rgb() {
     local a
+    # null command ':' removes all leading hashtag characters
     : "${1/\#/}"
+    # if hex value is 8 characters
     if ((${#_} == 8)); then
+        # convert characters to hex (see credits at bottom)
         ((r = 16#${_:0:2}, g = 16#${_:2:2}, b = 16#${_:4:2}, a = 16#${_:6:2}))
+        # simple calc for alpha channel
         a=$(echo "scale=2; $a / 255" | bc)
+    # else if hex value is 6 characters (no alpha channel)
     else
         ((r = 16#${_:0:2}, g = 16#${_:2:2}, b = 16#${_:4:2}))
         a=1.0
@@ -52,12 +53,10 @@ hex_to_rgb() {
 
 rgb_to_hex() {
     local a
-    if [[ "$*" =~ rgb ]]; then
-        set -- "$(tr ',' ' ' <<<"$*" | tr -cd ' 0-9')"
-    fi
-
+    # if a fourth arg is provided (alpha channel)
     if [[ -n "$4" ]]; then
-        a=$(alpha_to_hex "$4")
+        # converts alpha channel to hex (see below)
+        a=$(printf "%02x\n" "$(echo "scale=0; $4*255" | bc)" 2>/dev/null)
         printf "#%02x%02x%02x%s\n" "$1" "$2" "$3" "$a"
     else
         printf "#%02x%02x%02x\n" "$1" "$2" "$3"
@@ -112,10 +111,14 @@ main() {
 main "$@"
 
 # Credits:
-# hex_to_rgb() and rgb_to_hex() taken from Akash Mittal:
+# Thanks go out to those who helped:
+
+# Akash Mittal, whose article provided the original versions of hex_to_rgb() and rgb_to_hex() taken from
 # https://akashmittal.com/code-example-convert-hex-color-to-rgb-rgb-to-hex-using-bash-script/
 
-# Both users zeekar and DyslexicHobo on reddit for their help:
+# redditor zeekar who broke down what those functions did line by line:
 # https://reddit.com/r/bash/comments/zqmvz8/rgbhex_converter_syntax_how_does_this_work/
-# And yeah, I also used ChatGPT:
+
+# redditor DyslexicHobo, who suggested ChatGPT, which I used to finalize the
+# rgb_to_hex() function. Thank you AI overlords!
 # https://openai.com/blog/chatgpt/
