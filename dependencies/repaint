@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# set -vx
 
 error() {
     printf "error: %s\n" "$1" 1>&2
@@ -73,12 +72,3 @@ main() {
 }
 
 main "$@"
-
-# Credits:
-# hex_to_rgb() and rgb_to_hex() taken from Akash Mittal:
-# https://akashmittal.com/code-example-convert-hex-color-to-rgb-rgb-to-hex-using-bash-script/
-
-# Both users zeekar and DyslexicHobo on reddit for their help:
-# https://reddit.com/r/bash/comments/zqmvz8/rgbhex_converter_syntax_how_does_this_work/
-# And yeah, I also used ChatGPT:
-# https://openai.com/blog/chatgpt/
