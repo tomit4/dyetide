@@ -24,9 +24,6 @@ hex_to_rgb() {
 
 rgb_to_hex() {
     local a
-    if [[ "$*" =~ rgb ]]; then
-        set -- "$(tr ',' ' ' <<<"$*" | tr -cd ' 0-9')"
-    fi
 
     if [[ -n "$4" ]]; then
         a=$(alpha_to_hex "$4")
