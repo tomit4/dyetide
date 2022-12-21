@@ -1,7 +1,7 @@
-# dyeit - a simple bash color converter
+# dyetide - a simple bash color converter
 
-__dyeit is a simple tool for converting your hex code to rgba codes... or visa
-versa! dyeit uses classic command line tools like grep, sed, awk, tr, and the
+__dyetide is a simple tool for converting your hex code to rgba codes... or visa
+versa! dyetide uses classic command line tools like grep, sed, awk, tr, and the
 moreutils package sponge to generate a .dye file where you specify whether you
 want all the hex color codes within that file converted to rgba, or the other
 way around (rgba to hex).__
