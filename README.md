@@ -1,4 +1,4 @@
-## dyeit - a simple bash color converter
+# dyeit - a simple bash color converter
 
 __dyeit is a simple tool for converting your hex code to rgba codes... or visa
 versa! dyeit uses classic command line tools like grep, sed, awk, tr, and the
