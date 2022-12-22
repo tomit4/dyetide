@@ -92,9 +92,7 @@ rgb_to_hex() {
 }
 
 main() {
-    if [[ "$#" -lt 1 ]]; then
-        printhelp
-    fi
+    [[ "$#" -lt 1 ]] && printhelp
 
     while getopts ":x:r:?" arg; do
         case $arg in
