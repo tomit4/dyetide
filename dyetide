@@ -31,21 +31,23 @@ dependencycheck() {
     fi
 }
 
-# searches through all intances of hex color codes and replaces
-# them with rgba codes
+# search/replace all hex color codes with rgb codes
 replace_all_hex() {
     filename="${2}"
-
     if [[ -f "$filename" ]]; then
-        # declare -a array
-        grep -P -o '#[0-9a-fA-F]{8}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}' "${filename}" | tr '\n' ','
-            # tr doesn't work here as it only can replace a single character, we need a ', ' here
+        local allhexvalues hexvalues=()
+        mapfile -t allhexvalues < \
+            <( grep -P -o '#[0-9a-fA-F]{8}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}' "${filename}" )
+            while IFS= read -r -d '' x; do
+                hexvalues+=("$x");
+            done < \
+                <(printf "%s\0" "${allhexvalues[@]}" | sort -uz)
+        for hex in "${hexvalues[@]}"; do
+            rgb=$(./dependencies/repaint -x "$hex" )
+            sed -E "s/\s${hex}\s/ ${rgb} /g" < "$filename" | sponge "$filename"
+            sed -E "s/\s${hex};/ ${rgb};/g" < "$filename" | sponge "$filename"
+        done
     fi
-
-
-    # echo "${array[@]}"
-    # regex='^[#]?([0-9a-fA-F]{3})$|^[#]?([0-9a-fA-F]{6})$|^[#]?([0-9a-fA-F]{8})$'
-    # [[ $1 =~ $regex ]] && echo "matched" || echo "did not match"
 }
 
 # searches through all intances of rgb/rgba color codes and replaces

@@ -44,9 +44,15 @@ hex_to_rgb() {
         # simple calc for alpha channel
         a=$(echo "scale=2; $a / 255" | bc)
     # else if hex value is 6 characters (no alpha channel)
-    else
+    elif ((${#_} == 6)); then
         ((r = 16#${_:0:2}, g = 16#${_:2:2}, b = 16#${_:4:2}))
         a=1.0
+    # else if hex value is 3 characters (minimal hex value provided)
+    elif ((${#_} == 3)); then
+        ((r = 16#${_:0:1}, g = 16#${_:1:1}, b = 16#${_:2:1}))
+        a=1.0
+    else
+        error "$1 is not a recognized hex color code."
     fi
     printf "%s\n" "rgba($r, $g, $b, $a)"
 }
