@@ -36,7 +36,7 @@ dependencycheck() {
 replace_all_hex() {
     # filename="${2}"
     # grep "#" "${filename}"
-    regex='^[#]?[0-9a-fA-F]{6,8}$'
+    regex='^[#]?([0-9a-fA-F]{3})$|^[#]?([0-9a-fA-F]{6})$|^[#]?([0-9a-fA-F]{8})$'
     [[ $1 =~ $regex ]] && echo "matched" || echo "did not match"
 }
 
