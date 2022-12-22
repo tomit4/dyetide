@@ -62,10 +62,10 @@ replace_all_hex() {
             # replace with repaint after installation script is done
             rgb=$(./dependencies/repaint -x "$hex")
             # sed looks for hex codes with one trailing space...
-            # or a preceding space and a trailing space...
-            # or a preceding space and a trailing semicolon (css files)
             sed -i "s/\s${hex}\s/ ${rgb} /g" "$filename"
+            # or a preceding space and a trailing space...
             sed -i "s/${hex}\s/${rgb} /g" "$filename"
+            # or a preceding space and a trailing semicolon (css files)
             sed -i "s/\s${hex};/ ${rgb};/g" "$filename"
         done
 
