@@ -79,7 +79,7 @@ replace_all_rgb() {
     if [[ -f "$filename" ]]; then
         local regex
         # local allrgbvalues rgbvalues=()
-        regex='rgb[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}[)]|rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}, [0-1].[0-9][)]'
+        regex='rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}[)]|rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}, [0-1].[0-9][)]'
 
         grep -P -o "${regex}" "${filename}"
 
