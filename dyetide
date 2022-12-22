@@ -3,13 +3,13 @@
 
 printhelp() {
     cat <<EOM
-usage: dyeit [-x|-r] file
+usage: dyetide [-x|-r] file
 options:
  -x             replace all hex with rgba in file
  -r             replace all rgb with hex in file
 examples:
- dyeit -x file
- dyeit -r file
+ dyetide -x file
+ dyetide -r file
 EOM
     exit 1
 }
