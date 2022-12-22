@@ -45,8 +45,7 @@ replace_all_hex() {
         local allhexvalues hexvalues=()
         regex='#[0-9a-fA-F]{8}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}'
         # grabs all hex values in $filename and puts them in $allhexvalues
-        mapfile -t allhexvalues < \
-            <(grep -P -o "${regex}" "${filename}")
+        mapfile -t allhexvalues < <(grep -P -o "${regex}" "${filename}")
 
         if [[ ${#allhexvalues[@]} -eq 0 ]]; then
             error "no hex values found in $filename" 2
@@ -55,8 +54,7 @@ replace_all_hex() {
         # $hexvalues contains only unique hex values from $allhexvalues
         while IFS= read -r -d '' x; do
             hexvalues+=("$x")
-        done < \
-            <(printf "%s\0" "${allhexvalues[@]}" | sort -uz)
+        done < <(printf "%s\0" "${allhexvalues[@]}" | sort -uz)
 
         for hex in "${hexvalues[@]}"; do
             # replace with repaint after installation script is done
@@ -85,8 +83,7 @@ replace_all_rgb() {
 
         grep -P -o "${regex}" "${filename}"
 
-        # mapfile -t allrgbvalues < \
-        # <( grep -P -o  "${regex}" "${filename}" )
+        # mapfile -t allrgbvalues < <( grep -P -o  "${regex}" "${filename}" )
     else
         error "$filename not found" 2
     fi
