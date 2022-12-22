@@ -19,7 +19,14 @@ hex_to_rgb() {
         ((r = 16#${_:0:2}, g = 16#${_:2:2}, b = 16#${_:4:2}))
         a=1.0
     elif ((${#_} == 3)); then
-        ((r = 16#${_:0:1}, g = 16#${_:1:1}, b = 16#${_:2:1}))
+
+        r="$(echo "$1" | cut -c2)"
+        g="$(echo "$1" | cut -c3)"
+        b="$(echo "$1" | cut -c4)"
+
+        r=$(printf "%d" 0x$r$r)
+        g=$(printf "%d" 0x$g$g)
+        b=$(printf "%d" 0x$b$b)
         a=1.0
     else
         error "$1 is not a recognized hex color code."
