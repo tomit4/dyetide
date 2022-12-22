@@ -31,6 +31,9 @@ hex_to_rgb() {
 # numeric values from it and then pass that to rgb_to_hex()
 # parse_rgb() {
 #
+# sed and awk should do the trick, then map it to array
+# and feed it back as args to rgb_to_hex()
+#
 # }
 
 rgb_to_hex() {
