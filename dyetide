@@ -18,6 +18,12 @@ error() {
     printf "error: %s\n" "$1" 1>&2
     ${2:+exit $2}
 }
+
+success() {
+    printf "success: %s\n" "$1"
+    ${2:+exit 0}
+}
+
 # to be placed in install script, specifically for sponge
 dependencycheck() {
     local dep missingdependencies=0
@@ -37,19 +43,33 @@ replace_all_hex() {
     if [[ -f "$filename" ]]; then
         local rgb
         local allhexvalues hexvalues=()
+
+        # grabs all hex values in $filename and puts them in the allhexvalues array
         mapfile -t allhexvalues < \
             <( grep -P -o '#[0-9a-fA-F]{8}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}' "${filename}" )
-            while IFS= read -r -d '' x; do
-                hexvalues+=("$x");
-            done < \
-                <(printf "%s\0" "${allhexvalues[@]}" | sort -uz)
+
+        if [[ ${#allhexvalues[@]} -eq 0 ]]; then
+            error "no hex values found in $filename" 2
+        fi
+
+        # hexvalues array is containns only unique hex values from $filename
+        while IFS= read -r -d '' x; do
+            hexvalues+=("$x");
+        done < \
+            <(printf "%s\0" "${allhexvalues[@]}" | sort -uz)
+
         for hex in "${hexvalues[@]}"; do
+            # replace with repaint after installation script is done
             rgb=$(./dependencies/repaint -x "$hex" )
-            sed -E "s/\s${hex}\s/ ${rgb} /g" < "$filename" | sponge "$filename"
-            sed -E "s/\s${hex};/ ${rgb};/g" < "$filename" | sponge "$filename"
+            # sed looks for hex codes enclosed with two spaces
+            # or a preceding space and a trailing semicolon (css files)
+            sed -i "s/\s${hex}\s/ ${rgb} /g" "$filename"
+            sed -i "s/\s${hex};/ ${rgb};/g" "$filename"
         done
+
+        success "${filename}'s hex codes converted to rgba" 0
     else
-        error "$filename not found"
+        error "$filename not found" 2
     fi
 }
 
