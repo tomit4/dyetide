@@ -46,7 +46,7 @@ replace_all_hex() {
         regex='#[0-9a-fA-F]{8}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}'
         # grabs all hex values in $filename and puts them in $allhexvalues
         mapfile -t allhexvalues < \
-            <( grep -P -o  "${regex}" "${filename}" )
+            <(grep -P -o "${regex}" "${filename}")
 
         if [[ ${#allhexvalues[@]} -eq 0 ]]; then
             error "no hex values found in $filename" 2
@@ -54,13 +54,13 @@ replace_all_hex() {
 
         # $hexvalues contains only unique hex values from $allhexvalues
         while IFS= read -r -d '' x; do
-            hexvalues+=("$x");
+            hexvalues+=("$x")
         done < \
             <(printf "%s\0" "${allhexvalues[@]}" | sort -uz)
 
         for hex in "${hexvalues[@]}"; do
             # replace with repaint after installation script is done
-            rgb=$(./dependencies/repaint -x "$hex" )
+            rgb=$(./dependencies/repaint -x "$hex")
             # sed looks for hex codes enclosed with two spaces
             # or a preceding space and a trailing semicolon (css files)
             sed -i "s/\s${hex}\s/ ${rgb} /g" "$filename"
@@ -81,10 +81,10 @@ replace_all_rgb() {
         # local allrgbvalues rgbvalues=()
         regex='rgb[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}[)]|rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}, [0-1].[0-9][)]'
 
-        grep -P -o  "${regex}" "${filename}"
+        grep -P -o "${regex}" "${filename}"
 
         # mapfile -t allrgbvalues < \
-            # <( grep -P -o  "${regex}" "${filename}" )
+        # <( grep -P -o  "${regex}" "${filename}" )
     else
         error "$filename not found" 2
     fi
