@@ -24,7 +24,7 @@ success() {
     ${2:+exit 0}
 }
 
-# to be placed in install script, specifically for sponge
+# to be placed in install script
 dependencycheck() {
     local dep missingdependencies=0
     for dep in "$@"; do
@@ -44,7 +44,7 @@ replace_all_hex() {
         local rgb
         local allhexvalues hexvalues=()
 
-        # grabs all hex values in $filename and puts them in the allhexvalues array
+        # grabs all hex values in $filename and puts them in $allhexvalues
         mapfile -t allhexvalues < \
             <( grep -P -o '#[0-9a-fA-F]{8}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}' "${filename}" )
 
@@ -52,7 +52,7 @@ replace_all_hex() {
             error "no hex values found in $filename" 2
         fi
 
-        # hexvalues array is containns only unique hex values from $filename
+        # $hexvalues contains only unique hex values from $allhexvalues
         while IFS= read -r -d '' x; do
             hexvalues+=("$x");
         done < \
@@ -73,8 +73,7 @@ replace_all_hex() {
     fi
 }
 
-# searches through all intances of rgb/rgba color codes and replaces
-# them with hex codes
+# search/replace all rgb color codes with hex codes
 # replace_all_rgb() {
 
 # }
