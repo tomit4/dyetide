@@ -37,7 +37,6 @@ dependencycheck() {
     fi
 }
 
-# search/replace all hex color codes with rgb codes
 replace_all_hex() {
     local filename
     filename="${2}"
@@ -74,7 +73,6 @@ replace_all_hex() {
     fi
 }
 
-# search/replace all rgb color codes with hex codes
 replace_all_rgb() {
     local filename
     filename="${2}"

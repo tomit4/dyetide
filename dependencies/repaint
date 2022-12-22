@@ -27,6 +27,12 @@ hex_to_rgb() {
     printf "%s\n" "rgba($r, $g, $b, $a)"
 }
 
+# parse_rgb() takes rgb string to extract
+# numeric values from it and then pass that to rgb_to_hex()
+# parse_rgb() {
+#
+# }
+
 rgb_to_hex() {
     local a
 
@@ -55,6 +61,8 @@ main() {
                 printf "%s\n" "$rgbval"
                 ;;
             r)
+                # parse an 'rgb()' or 'rgba' string here
+                # regex compare to string,
                 if [[ "$#" -gt 5 ]]; then
                     error "-r parses up to four following argument"
                     exit 2
