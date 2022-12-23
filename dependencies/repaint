@@ -34,14 +34,18 @@ hex_to_rgb() {
     printf "%s\n" "rgba($r, $g, $b, $a)"
 }
 
-# parse_rgb() takes rgb string to extract
-# numeric values from it and then pass that to rgb_to_hex()
-# parse_rgb() {
-#
-# sed and awk should do the trick, then map it to array
-# and feed it back as args to rgb_to_hex()
-#
-# }
+# parse_rgb() takes rgb string to pass to rgb_to_hex()
+parse_rgb() {
+    local regex='^rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}[)]$|^rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}, [0-1].[0-9][)]$'
+    if [[ $2 =~ $regex ]]; then
+        local numbers
+        numbers=$(echo "$2" | sed -n 's/.*\(([^()]*)\).*/\1/p' | sed 's/[()]//g' | sed 's/,\s/ /g')
+        read -r -a rgb <<< "$numbers"
+        rgb_to_hex  "${rgb[$"0"]}" "${rgb[$"1"]}" "${rgb[$"2"]}" "${rgb[$"3"]}"
+    else
+        error "$2 pattern passed is not valid rgba format" 2
+    fi
+}
 
 rgb_to_hex() {
     local a
@@ -69,18 +73,14 @@ main() {
                 printf "%s\n" "$rgbval"
                 ;;
             r)
-                # parse an 'rgb()' or 'rgba' string here
-                # regex compare to string,
-                if [[ "$#" -gt 5 ]]; then
-                    error "-r parses up to four following argument"
-                    exit 2
-                elif [[ "$#" -lt 4 ]]; then
-                    error "-r parses no less than three arguments"
-                    exit 2
-                fi
                 local hexval
-                hexval=$(rgb_to_hex "${@:2}")
-                printf "%s\n" "$hexval"
+                if [[ "$#" -eq 2 ]]; then
+                    hexval=$(parse_rgb "$@")
+                    printf "%s\n" "$hexval"
+                else
+                    hexval=$(rgb_to_hex "${@:2}")
+                    printf "%s\n" "$hexval"
+                fi
                 ;;
             ?)
                 exit 2
