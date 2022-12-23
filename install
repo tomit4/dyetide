@@ -1,0 +1,186 @@
+#!/usr/bin/env bash
+
+# install and uninstall script for dyetide bash script and data files
+
+# Requires root privilege unless --user / --home is used
+# Use --dry-run first to preview what will be done
+
+usage() {
+cat << EOM
+$0 [options]
+Options:
+ --user, --home             install to (uninstall from) home directory
+ --dry-run                  prints actions rather than performing them
+ -v, --verbose              print verbose information
+ -h, --help                 output usage information
+
+Environment variables that affect installation:
+ PREFIX                     default: /usr/local **
+ BINDIR                     default: PREFIX/bin
+ DATADIR                    default: PREFIX/share
+ MANDIR                     default: DATADIR/man
+
+** If --user/--home specified, PREFIX defaults to ~/.local
+EOM
+}
+
+do_log() {
+    printf "%s\n" "$*" 1>&2
+    return 0
+}
+
+# Determine elevation mechanism
+if command -v "doas" &> /dev/null ; then
+    __elev="doas"
+else
+    __elev="sudo"
+fi
+
+# Parse arguments
+for arg in "$@" ; do
+    case "$arg" in
+        --user|--home)
+            PREFIX="${PREFIX:-${HOME}/.local}"
+            __elev=""
+            ;;
+        --verbose|-v)
+            __verbose=1
+            ;;
+        --dry-run)
+            __log=do_log
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+    esac
+done
+
+bindir="${BINDIR:-${PREFIX:-/usr/local}/bin}"
+datadir="${DATADIR:-${PREFIX:-/usr/local}/share}"
+mandir="${MANDIR:-$datadir/man}"
+
+if [[ -n $__verbose ]] ; then
+    echo "BINDIR=\"$bindir\""
+    echo "DATADIR=\"$datadir\""
+    echo "MANDIR=\"$mandir\""
+    [[ -n $__elev ]] && echo "using $__elev for privilege elevation"
+fi
+
+error() {
+    printf "error: %s\n" "$1" 1>&2
+    ${2:+exit $2}
+}
+
+dependencycheck() {
+    local dep missingdependencies=0
+    for dep in "$@" ; do
+        if ! command -v "$dep" &> /dev/null ; then
+            error "dependency not met: $dep"
+        fi
+    done
+    if [[ $missingdependencies -gt 0 ]] ; then
+        exit 1
+    fi
+}
+
+
+function changeowner() {
+        [[ -n $__elev ]] || return
+        $__log $__elev chown -R "$USER":"$USER" ./*
+}
+
+function overwrite() {
+    local resp
+    read -e -r -p "$1(y/n): " resp
+    case "$resp" in
+        [Yy]|yes)
+            return 0
+            ;;
+        *)
+            printf "%s\n" "no change made"
+            ;;
+    esac
+    return 1
+}
+
+function install_binfile() {
+    local file base
+    for file in "$@"; do
+        base="${file##*/}"
+        if [[ -f "$bindir/$base" ]] ; then
+            overwrite "$base already installed, would you like to reinstall?" || continue
+        fi
+        $__log $__elev cp "$file" "$bindir/" || error "failed to create $bindir/$base"
+        $__log $__elev chmod 755 "$bindir/$base" || error "failed to change permission of $bindir/$base"
+    done
+}
+
+function uninstall_binfile() {
+    local file
+    for file in "$@"; do
+        [[ -e "$bindir/$file" ]] || continue
+        $__log $__elev rm -f "$bindir/$file" || error "failed to remove $bindir/$file"
+    done
+}
+
+function install_data() {
+    if [[ -d "$datadir/dyetide" ]] ; then
+        overwrite "$datadir/dyetide directory already exists, would you like to overwrite configuration files?" || return
+        $__log $__elev rm -rf "$datadir/dyetide" || error "failed to remove existing $datadir/dyetide directory" 2
+    fi
+    printf "%s\n" "installing configuration files in directory $datadir/dyetide/ ..."
+    $__log $__elev mkdir -p "$datadir/dyetide" || error "failed to create $datadir/dyetide directory" 2
+    local target
+    for target in "$@" ; do
+        $__log $__elev cp -r "$target" "$datadir/dyetide/" || error "failed to copy $target to $datadir/dyetide"
+    done
+}
+
+function uninstall_data() {
+    [[ -d "$datadir/dyetide" ]] || return
+    $__log $__elev rm -rf "$datadir/dyetide" || error "failed to remove $datadir/dyetide directory"
+}
+
+function install_manfile() {
+    local sub file base
+    sub="$1"; shift
+    $__log $__elev mkdir -p "$mandir/$sub" || error "failed to create $mandir/$sub directory" 2
+    for file in "$@" ; do
+        base="${file##*/}"
+        if [[ -f "$mandir/$sub/$base" ]] ; then
+            overwrite "$base already installed, would you like to reinstall?" || continue
+        fi
+        $__log $__elev cp "$file" "$mandir/$sub" || error "failed to create $mandir/$sub/$base"
+    done
+}
+
+function uninstall_manfile() {
+    local sub file
+    sub="$1"; shift
+    for file in "$@"; do
+        [[ -e "$mandir/$sub/$file" ]] || continue
+        $__log $__elev rm -f "$mandir/$sub/$file" || error "failed to remove $mandir/$sub/$file"
+    done
+}
+
+#
+# main routine
+#
+
+case "$0" in
+    *uninstall*)
+        dependencycheck $__elev rm
+        uninstall_binfile dyetide dye repaint
+        # uninstall_data
+        # uninstall_manfile man1 dyetide.1.gz # repaint.1.gz ?
+        ;;
+    *)
+        changeowner
+        dependencycheck $__elev chown cp chmod mkdir date awk sed rm find sort grep
+        install_binfile dyetide dye repainter/repaint
+        # install_data licenses headers repaint
+        # install_manfile man1 man_page/*.1.gz
+        ;;
+esac
+
