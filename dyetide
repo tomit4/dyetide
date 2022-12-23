@@ -24,19 +24,6 @@ success() {
     exit 0
 }
 
-# to be placed in install script
-dependencycheck() {
-    local dep missingdependencies=0
-    for dep in "$@"; do
-        if ! command -v "$dep" &>/dev/null; then
-            error "dependency not met: $dep"
-        fi
-    done
-    if [[ $missingdependencies -gt 0 ]]; then
-        exit 1
-    fi
-}
-
 replace_all_hex() {
     local filename
     filename="${2}"
