@@ -62,6 +62,7 @@ replace_all_hex() {
             sed -i "s/ ${hex} / ${rgb} /g" "$filename"
             sed -i "s/${hex} /${rgb} /g" "$filename"
             sed -i "s/ ${hex};/ ${rgb};/g" "$filename"
+            sed -i "s/${hex}/${rgb}/g" "$filename"
         done
 
         success "${filename}'s hex codes converted to rgba" 0
