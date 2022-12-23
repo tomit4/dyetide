@@ -102,7 +102,6 @@ main() {
                 printf "%s\n" "$rgbval"
                 read -e -r -p "save code to clipboard?(y/n): " clipit
                 if [[ "$clipit" == "yes" || "$clipit" == "y" ]]; then
-                    dependencycheck xclip
                     printf "%s" "$rgbval" | xclip -sel clip
                 fi
                 ;;
