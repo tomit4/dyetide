@@ -43,7 +43,7 @@ parse_rgb() {
         read -r -a rgb <<< "$numbers"
         rgb_to_hex  "${rgb[$"0"]}" "${rgb[$"1"]}" "${rgb[$"2"]}" "${rgb[$"3"]}"
     else
-        error "$2 pattern passed is not valid rgba format" 2
+        error "$2 pattern passed is not valid rgba format"
     fi
 }
 
