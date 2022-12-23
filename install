@@ -177,7 +177,7 @@ case "$0" in
         ;;
     *)
         changeowner
-        dependencycheck $__elev chown cp chmod mkdir date awk sed rm find sort grep
+        dependencycheck $__elev chown cp chmod mkdir date awk sed rm find sort grep xclip
         install_binfile dyetide dye repainter/repaint
         # install_data licenses headers repaint
         # install_manfile man1 man_page/*.1.gz

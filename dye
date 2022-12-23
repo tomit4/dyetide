@@ -23,18 +23,6 @@ error() {
     exit 2
 }
 
-dependencycheck() {
-    local dep missingdependencies=0
-    for dep in "$@"; do
-        if ! command -v "$dep" &>/dev/null; then
-            error "dependency not met: $dep"
-        fi
-    done
-    if [[ $missingdependencies -gt 0 ]]; then
-        exit 1
-    fi
-}
-
 hex_to_rgb() {
     local a
     # null command ':' removes all leading hashtag characters
@@ -125,7 +113,6 @@ main() {
                     printf "%s\n" "$hexval"
                     read -e -r -p "save code to clipboard?(y/n): " clipit
                     if [[ "$clipit" == "yes" || "$clipit" == "y" ]]; then
-                        dependencycheck xclip
                         printf "%s" "$hexval" | xclip -sel clip
                     fi
                 else
@@ -133,7 +120,6 @@ main() {
                     printf "%s\n" "$hexval"
                     read -e -r -p "save code to clipboard?(y/n): " clipit
                     if [[ "$clipit" == "yes" || "$clipit" == "y" ]]; then
-                        dependencycheck xclip
                         printf "%s" "$hexval" | xclip -sel clip
                     fi
                 fi
