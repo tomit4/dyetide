@@ -8,10 +8,13 @@ options:
  -x [color_code]                   hex to rgb
  -r [color_code]                   rgb to hex
 examples:
+ dye -x rgb "#fff"
  dye -x rgb "#ffffff"
  dye -r hex "rgb(255, 255, 255)"
  dye -x rgb "#43fF6480"
  dye -r hex "rgba(67, 255, 100, 0.5)"
+ dye -h rgb "hsl(350, 100, 100)"
+ dye -h hex "hsla(350, 100, 100, 1.0)"
 EOM
     exit 0
 }
@@ -61,6 +64,8 @@ hex_to_rgb() {
     printf "%s\n" "rgba($r, $g, $b, $a)"
 }
 
+# hex_to_hsl() {}
+
 # parse_rgb() takes rgb string to pass to rgb_to_hex()
 parse_rgb() {
     local regex='^rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}[)]$|^rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}, [0-1]?.[0-9][0-9]?[)]$'
@@ -86,21 +91,28 @@ rgb_to_hex() {
     fi
 }
 
+# rgb_to_hsl() {}
+
+# hsl_to_hex() {}
+
+# hsl_to_rgb() {}
+
 main() {
     [[ "$#" -lt 1 ]] && printhelp
 
-    while getopts ":x:r:?" arg; do
+    while getopts ":x:r:h:?" arg; do
         case $arg in
             x)
                 if [[ "$2" == "rgb" ]]; then
                     local rgbval clipit
-                    rgbval=$(hex_to_rgb "${@}")
+                    rgbval=$(hex_to_rgb "$@")
                     printf "%s\n" "$rgbval"
                     read -e -r -p "save code to clipboard?(y/n): " clipit
                     if [[ "$clipit" == "yes" || "$clipit" == "y" ]]; then
                         printf "%s" "$rgbval" | xclip -sel clip
                     fi
                 # elif [[ "$2" -eq "hsl" ]]; then
+                     # hex_to_hsl "$@"
                 fi
                 ;;
             r)
@@ -113,7 +125,16 @@ main() {
                         printf "%s" "$hexval" | xclip -sel clip
                     fi
                 # elif [[ "$2" -eq "hsl" ]]; then
+                     # rgb_to_hsl "$@"
                 fi
+                ;;
+            h)
+                printhelp
+                # if [[ "$2" == "rgb" ]]; then
+                    # hsl_to_rgb "$@"
+                # elif [[ "$2" == "hex" ]]; then
+                    # hsl_to_hex "$@"
+                # fi
                 ;;
             ?)
                 printhelp
