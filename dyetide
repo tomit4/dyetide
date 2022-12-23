@@ -19,7 +19,6 @@ error() {
     exit 1
 }
 
-
 success() {
     printf "success: %s\n" "$1" 2>&1
     exit 0
@@ -65,9 +64,9 @@ replace_all_hex() {
             sed -i "s/${hex}/${rgb}/g" "$filename"
         done
 
-        success "${filename}'s hex codes converted to rgba" 0
+        success "${filename}'s hex codes converted to rgba"
     else
-        error "$filename not found" 2
+        error "$filename not found"
     fi
 }
 
