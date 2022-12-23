@@ -8,7 +8,7 @@ command line tool for doing one at a time color conversions, for when you need
 to know what a hex/rgba code is in rgba/hex right now!__
 
 - [x] Create bash script that outputs hex or rgba, dye (see depenendencies dir).
-- [ ] Create bash script that looks through a test.css file and switches out all hex code for rgba (rgba to hex).
-- [ ] Create installation script based off of upnup's installation script.
+- [x] Create bash script that looks through a test.css file and switches out all hex code for rgba (rgba to hex).
+- [x] Create installation script based off of upnup's installation script.
 - [ ] Create man page for project.
 - [ ] Create gif or asciiden demonstrationg basic usage.
