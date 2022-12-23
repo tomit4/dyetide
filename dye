@@ -5,8 +5,9 @@ printhelp() {
     cat <<EOM
 usage: dye [-x|-r] [color_code] "input_color"
 options:
- -x [color_code]                   hex to rgb
- -r [color_code]                   rgb to hex
+ -x [color_code]          hex to [color_code]
+ -r [color_code]          rgb to [color_code]
+ -h [color_code]          hsl to [color_code]
 examples:
  dye -x rgb "#fff"
  dye -x rgb "#ffffff"
