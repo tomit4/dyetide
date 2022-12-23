@@ -59,7 +59,7 @@ rgb_to_hex() {
 }
 
 main() {
-    [[ "$#" -lt 1 ]] && printhelp
+    [[ "$#" -lt 1 ]] && error "repaint is a dependency of dyetide, use dye instead"
 
     while getopts ":x:r:?" arg; do
         case $arg in
