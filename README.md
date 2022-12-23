@@ -10,5 +10,6 @@ to know what a hex/rgba code is in rgba/hex right now!__
 - [x] Create bash script that outputs hex or rgba, dye (see depenendencies dir).
 - [x] Create bash script that looks through a test.css file and switches out all hex code for rgba (rgba to hex).
 - [x] Create installation script based off of upnup's installation script.
+- [ ] Integrate hsl/hsla color conversion into dye, then repainter and dyetide
 - [ ] Create man page for project.
 - [ ] Create gif or asciiden demonstrationg basic usage.
