@@ -12,11 +12,12 @@ options:
 examples:
  dye -x rgb "#fff"
  dye -x rgb "#ffffff"
- dye -r hex "rgb(255, 255, 255)"
  dye -x rgb "#43fF6480"
+ dye -r hex "rgb(255, 255, 255)"
+ dye -r hsl "rgba(67, 255, 100, 0.8)"
  dye -r hex "rgba(67, 255, 100, 0.5)"
- dye -h rgb "hsl(350, 100, 100)"
  dye -h hex "hsla(350, 100, 100, 1.0)"
+ dye -h rgb "hsl(350, 100, 100)"
 EOM
     exit 0
 }
@@ -213,8 +214,23 @@ rgb_to_hsl() {
     printf "%s\n" "hsla($h, $s, $l, $a)"
 }
 
-# hsl_to_hex() {}
+parse_hsl_to_hex() {
+    local regex='^hsl[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}[)]$|^hsl[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}, [0-1]?.?[0-9]?[0-9][)]$'
+    if [[ $3 =~ $regex ]]; then
+        local numbers
+        numbers=$(echo "$3" | sed -n 's/.*\(([^()]*)\).*/\1/p' | sed 's/[()]//g' | sed 's/,\s/ /g')
+        read -r -a hsl <<< "$numbers"
+        hsl_to_hex  "${hsl[$"0"]}" "${hsl[$"1"]}" "${hsl[$"2"]}" "${hsl[$"3"]}"
+    else
+        error "pattern passed is not valid hsla format"
+    fi
+}
 
+hsl_to_hex() {
+   printf "%s\n" "$1 $2 $3 $4"
+}
+
+# parse_hsl_to_rgb() {}
 # hsl_to_rgb() {}
 
 main() {
@@ -251,7 +267,7 @@ main() {
                         printf "%s" "$hexval" | xclip -sel clip
                     fi
                 elif [[ "$2" == "hsl" ]]; then
-                    local hslval
+                    local hslval clipit
                     hslval=$(parse_rgb_to_hsl "$@")
                     printf "%s\n" "$hslval"
                     read -e -r -p "save code to clipboard?(y/n): " clipit
@@ -261,7 +277,13 @@ main() {
                 fi
                 ;;
             h)
-                printhelp
+                if [[ "$2" == "hex" ]]; then
+                    local hexval
+                    hexval=$(parse_hsl_to_hex "$@")
+                    printf "%s\n" "$hexval"
+
+                # elif [[ "$2" == "rgb" ]]; then
+                fi
                 # if [[ "$2" == "rgb" ]]; then
                     # hsl_to_rgb "$@"
                 # elif [[ "$2" == "hex" ]]; then
