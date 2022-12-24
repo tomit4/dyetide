@@ -41,23 +41,7 @@ hex_to_rgb() {
         a=1.0
     # else if hex value is 3 characters (minimal hex value provided)
     elif ((${#_} == 3)); then
-        # if the first character still has a hashtag in it...
-        if [[ ${3:0:1} != "#" ]]; then
-            color="#$3"
-        else
-            color="$3"
-        fi
-        # grab out each passed value
-        r="$(echo "$color" | cut -c2)"
-        g="$(echo "$color" | cut -c3)"
-        b="$(echo "$color" | cut -c4)"
-
-        # and convert them to hexadecimal
-        r=$(printf "%d" 0x$r$r)
-        g=$(printf "%d" 0x$g$g)
-        b=$(printf "%d" 0x$b$b)
-
-        # ((r = 16#${_:0:1}, g = 16#${_:1:1}, b = 16#${_:2:1}))
+        ((r = 16#${_:0:1}${_:0:1}, g = 16#${_:1:1}${_:1:1}, b = 16#${_:2:1}${_:2:1}))
         a=1.0
     else
         error "$3 is not a recognized hex color code."
