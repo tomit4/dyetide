@@ -180,7 +180,7 @@ parse_rgb_to_hsl() {
 }
 
 # runtime error here, enter standard 'dye -r hsl "rgb(255, 255, 255)"'
-# strange bugs, 'dye -r hsl "rgb(255, 255, 254)" works just fine for some reason...'
+# strange bug, 'dye -r hsl "rgb(255, 255, 254)" works just fine for some reason...'
 rgb_to_hsl() {
     r=$(echo "scale=2; $1 / 255" | bc -l)
     g=$(echo "scale=2; $2 / 255" | bc -l)
@@ -188,7 +188,7 @@ rgb_to_hsl() {
 
     local a
     if [[ -n "$4" ]]; then
-        a=$(echo "scale=2; $4 / 255" | bc -l)
+        a="$4"
     else
         a=1.0
     fi
