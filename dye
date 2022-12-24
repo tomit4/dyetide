@@ -226,12 +226,80 @@ parse_hsl_to_hex() {
     fi
 }
 
-hsl_to_hex() {
-   printf "%s\n" "$1 $2 $3 $4"
+# Convert RGB values to HEX
+# function rgb_to_hex() {
+    # local red=$1
+    # local green=$2
+    # local blue=$3
+    # printf '#%02X%02X%02X' $red $green $blue
+# }
+
+# Convert HSL to HEX
+# function hsl_to_hex() {
+    # local hue=$1
+    # local saturation=$2
+    # local lightness=$3
+
+    # Convert HSL to RGB
+    # local red green blue
+    # read red green blue <<< $(hsl_to_rgb $hue $saturation $lightness)
+
+    # Convert RGB to HEX
+    # rgb_to_hex $red $green $blue
+# }
+
+# hsl_to_hex() {
+# }
+
+# obviously you get you need to refactor this later
+parse_hsl_to_rgb() {
+    local regex='^hsl[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}[)]$|^hsl[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}, [0-1]?.?[0-9]?[0-9][)]$'
+    if [[ $3 =~ $regex ]]; then
+        local numbers
+        numbers=$(echo "$3" | sed -n 's/.*\(([^()]*)\).*/\1/p' | sed 's/[()]//g' | sed 's/,\s/ /g')
+        read -r -a hsl <<< "$numbers"
+        hsl_to_rgb  "${hsl[$"0"]}" "${hsl[$"1"]}" "${hsl[$"2"]}" "${hsl[$"3"]}"
+    else
+        error "pattern passed is not valid hsla format"
+    fi
 }
 
-# parse_hsl_to_rgb() {}
-# hsl_to_rgb() {}
+hsl_to_rgb() {
+    local a=1
+    local h=$1
+    local s=$2
+    local l=$3
+
+    # if a fourth arg is provided (alpha channel)
+    if [[ -n "$4" ]]; then
+        a=$(echo "scale=2; $a / 255" | bc -l)
+    fi
+
+    # color is grey and all three rgb values should be equal to the $l
+    if [[ $s -eq 0 ]]; then
+        printf "%s" "$l $l $l"
+        return
+    fi
+
+    # Mathematical conversions for HSL values to RGB
+    # base = lightness * 2 - saturation
+    local base="$((l * 2 - s))"
+    # max = ((lightness *2 - saturation) + saturation) * 2
+    local max="$(((base + s) * 2))"
+    # multiply hue by six to use for calculation of rgb
+    local h6=$((h * 6))
+
+    # r,g,b are determined based off of h6 value,
+    # if h6 is less than value (1, 2, or 3)
+    # then h6 becomes either base or remains the same value
+    # it then compares to further incrementing values  maxing out at $l
+    local r=$((h6 < 1 ? base : h6 < 3 ? max : h6 < 4 ? base : $l))
+    local g=$((h6 < 2 ? base : h6 < 4 ? max : h6 < 5 ? base : $l))
+    local b=$((h6 < 3 ? base : h6 < 5 ? max : h6 < 6 ? base : $l))
+
+    # we are then presented with the resulting rgb values...
+    echo "$r $g $b"
+}
 
 main() {
     [[ "$#" -lt 1 ]] && printhelp
