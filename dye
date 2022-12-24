@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # set -vx
+# set -x
 
 printhelp() {
     cat <<EOM
@@ -49,7 +50,85 @@ hex_to_rgb() {
     printf "%s\n" "rgba($r, $g, $b, $a)"
 }
 
-# hex_to_hsl() {}
+dec_to_float() {
+    echo "scale=2; $1 / 255" | bc -l
+}
+
+find_min_max() {
+   local r=$1
+   local g=$2
+   local b=$3
+   min=$r
+   max=$r
+   if [[ $(echo "$g > $max" | bc) -eq 1 ]]; then
+       max=$g
+   elif [[ $(echo "$g < $min" | bc) -eq 1 ]]; then
+       min=$g
+   fi
+   if [[ $(echo "$b > $max" | bc) -eq 1 ]]; then
+       max=$b
+   elif [[ $(echo "$b < $min" | bc) -eq 1 ]]; then
+       min=$b
+   fi
+}
+
+calculate_saturation() {
+    local min=$1
+    local max=$2
+    l=$3
+    if [[ $(echo "$max == $min" | bc) -eq 1 ]]; then
+        printf "%.0f" 0
+    else
+        if [[ $(echo "$l < 0.5" | bc) -eq 1 ]]; then
+            printf "%.0f" "$(echo "scale=2; (($max - $min) / ($max + $min) * 100)" | bc)"
+        else
+            printf "%.0f" "$(echo "scale=2; (($max - $min) / (2 - $max - $min) * 100)" | bc)"
+        fi
+    fi
+}
+
+calculate_hue() {
+    local min=$1
+    local max=$2
+    if [[ $(echo "$max == $min" | bc) -eq 1 ]]; then
+        printf "%.0f" 0
+    else
+        if [[ $(echo "$r == $max" | bc) -eq 1 ]]; then
+            printf "%.0f" "$(echo "scale=2; 60 * (($g - $b) / ($max - $min))" | bc)"
+        elif [[ $(echo "$g == $max" | bc) -eq 1 ]]; then
+            printf "%.0f" "$(echo "scale=2; 60 * (($b - $r) / ($max - $min)) + 120" | bc)"
+        else
+            printf "%.0f" "$(echo "scale=2; 60 * (($r -$g) / ($max - $min)) + 240" | bc)"
+        fi
+    fi
+}
+
+hex_to_hsl() {
+    local a=1.0
+    : "${3/\#/}"
+    if ((${#_} == 8)); then
+        ((r = 16#${_:0:2}, g = 16#${_:2:2}, b = 16#${_:4:2}, a = 16#${_:6:2}))
+        a=$(echo "scale=2; $a / 255" | bc)
+    elif ((${#_} == 6)); then
+        ((r = 16#${_:0:2}, g = 16#${_:2:2}, b = 16#${_:4:2}))
+    elif ((${#_} == 3)); then
+        ((r = 16#${_:0:1}, g = 16#${_:1:1}, b = 16#${_:2:1}))
+        r=$((r * 16 + r))
+        g=$((g * 16 + g))
+        b=$((b * 16 + b))
+    fi
+    r=$(dec_to_float "$r")
+    g=$(dec_to_float "$g")
+    b=$(dec_to_float "$b")
+    find_min_max "$r" "$g" "$b"
+    l=$(printf "%.0f" "$(echo "scale=2; (($max + $min) / 2 * 100)" | bc)")
+    s=$(calculate_saturation "$min" "$max" "$l")
+    h=$(calculate_hue "$min" "$max")
+    if [[ $(echo "$h < 0" | bc) -eq 1 ]]; then
+        h=$(echo "scale=2; $h + 360" | bc)
+    fi
+    printf "%s\n" "hsla($h, $s, $l, $a)"
+}
 
 # parse_rgb() takes rgb string to pass to rgb_to_hex()
 parse_rgb() {
@@ -70,8 +149,10 @@ rgb_to_hex() {
     if [[ -n "$4" ]]; then
         # converts alpha channel to hex (see below)
         a=$(printf "%02x\n" "$(echo "scale=0; $4*255" | bc)" 2>/dev/null)
+        # pads hex value with leading 0s
         printf "#%02x%02x%02x%s\n" "$1" "$2" "$3" "$a"
     else
+        # pads hex value with leading 0s
         printf "#%02x%02x%02x\n" "$1" "$2" "$3"
     fi
 }
@@ -96,8 +177,8 @@ main() {
                     if [[ "$clipit" == "yes" || "$clipit" == "y" ]]; then
                         printf "%s" "$rgbval" | xclip -sel clip
                     fi
-                # elif [[ "$2" -eq "hsl" ]]; then
-                     # hex_to_hsl "$@"
+                elif [[ "$2" == "hsl" ]]; then
+                     hex_to_hsl "$@"
                 fi
                 ;;
             r)
