@@ -298,6 +298,13 @@ hue_to_rgb() {
 
 hsl_to_rgb() {
     local h s l r g b
+    # keep the hue within 0 - 360
+    h="$((($1 % 360 % 360) % 360))"
+    # keep the saturation between 0 -100
+    s="$((($2 > 100 ? 100 : $2 < 0 ? 0 : $2)))"
+    l="$((($3 > 100 ? 100 : $3 < 0 ? 0 : $3)))"
+
+    # convert all values to between 0 - 1
     h=$(echo "scale=6; $1 / 360" | bc -l)
     s=$(echo "scale=6; $2 / 100" | bc -l)
     l=$(echo "scale=6; $3 / 100" | bc -l)
@@ -306,14 +313,17 @@ hsl_to_rgb() {
     if [[ -n "$4" ]]; then
         a=$4
     else
-        a=1
+        a=""
     fi
 
-    # color is grey and all three rgb values should be equal to the $l
-    if [[ $s == 0 ]]; then
-        r=$l
-        g=$l
-        b=$l
+    # color is grey and all three rgb values should be equal to the original
+    # lightness value
+    if [[ $2 -eq 0 ]]; then
+        r=$3
+        g=$3
+        b=$3
+        printf "%s\n" "$r $g $b $a"
+        exit 0
     else
         local q p
         if [[ "$l" < .50 ]]; then
@@ -322,8 +332,6 @@ hsl_to_rgb() {
             q=$(echo "scale=6; $l + $s - $l * $s" | bc -l)
         fi
         p=$(echo "scale=6; 2 * $l - $q" | bc -l)
-        # values are slightly off here possibly due to bc or awk calculating
-        # incorrectly
         # r=$(hue_to_rgb "$p" "$q" "$(echo "scale=1; $h + 1 / 3" | bc -l)")
         r=$(hue_to_rgb "$p" "$q" "$(echo "$h" | awk '{print $1 + (1 / 3)}')")
         g=$(hue_to_rgb "$p" "$q" "$h")
@@ -333,7 +341,11 @@ hsl_to_rgb() {
     r="$(printf "%.0f" "$(echo "scale=6; $r * 255" | bc -l)")"
     g="$(printf "%.0f" "$(echo "scale=6; $g * 255" | bc -l)")"
     b="$(printf "%.0f" "$(echo "scale=6; $b * 255" | bc -l)")"
-    echo "$r $g $b $a"
+    # clamp the results between 0 and 255 values
+    r=$(echo "$r" | awk '{print ($1 > 255 ? 255 : $1 < 0 ? 0 : $1)}' | xargs printf "%d")
+    g=$(echo "$g" | awk '{print ($1 > 255 ? 255 : $1 < 0 ? 0 : $1)}' | xargs printf "%d")
+    b=$(echo "$b" | awk '{print ($1 > 255 ? 255 : $1 < 0 ? 0 : $1)}' | xargs printf "%d")
+    printf "%s\n" "$r $g $b $a"
 
 }
 
