@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # set -vx
-# set -x
+# set x
 
 printhelp() {
     cat <<EOM
@@ -266,41 +266,71 @@ parse_hsl_to_rgb() {
     fi
 }
 
+hue_to_rgb() {
+    # p=mid
+    # q=chroma
+    # t=hue
+    p=$1 q=$2 t=$3
+
+    if [[ $(echo "$t < 0" | bc -l) -eq "1" ]]; then
+        t=$(echo "scale=2; $t + 1" | bc -l)
+    elif [[ $(echo "$t > 1" | bc -l) -eq "1" ]]; then
+        t=$(echo "scale=2; $t - 1" | bc -l)
+    fi
+
+    if [[ $(echo "$t <= 1 / 6" | bc -l) -eq "1" ]]; then
+        p=$(echo "scale=2; $p + ($q - $p) * 6 * $t" | bc -l)
+        echo "$p"
+        exit 0
+    elif [[ $(echo "$t < 1 / 2" | bc -l) -eq "1" ]]; then
+        p=$q
+        echo "$p"
+        exit 0
+    elif [[ $(echo "$t < 2 / 3" | bc -l) -eq "1" ]]; then
+        p=$(echo "scale=2; $p + ($q - $p) * (2 / 3 - $t) * 6" | bc -l)
+        echo "$p"
+        exit 0
+    fi
+    echo "$p"
+}
+
+
 hsl_to_rgb() {
-    local a=1
-    local h=$1
-    local s=$2
-    local l=$3
+    local h s l r g b
+    h=$(echo "scale=4; $1 / 360" | bc -l)
+    s=$(echo "scale=2; $2 / 100" | bc -l)
+    l=$(echo "scale=2; $3 / 100" | bc -l)
 
     # if a fourth arg is provided (alpha channel)
     if [[ -n "$4" ]]; then
-        a=$(echo "scale=2; $a / 255" | bc -l)
+        a=$4
+    else
+        a=1
     fi
 
     # color is grey and all three rgb values should be equal to the $l
-    if [[ $s -eq 0 ]]; then
-        printf "%s" "$l $l $l"
-        return
+    if [[ $s == 0 ]]; then
+        r=$l
+        g=$l
+        b=$l
+    else
+        local q p
+        if [[ "$l" < .50 ]]; then
+            q=$(echo "scale=2; $l * (100 + $s)" | bc -l)
+        else
+            q=$(echo "scale=2; $l + $s - $l * $s" | bc -l)
+        fi
+        p=$(echo "scale=2; 2 * $l - $q" | bc -l)
+        r=$(hue_to_rgb "$p" "$q" "$(echo "scale=1; $h + 1 / 3" | bc -l)")
+        g=$(hue_to_rgb "$p" "$q" "$h")
+        b=$(hue_to_rgb "$p" "$q" "$(echo "$h" | awk '{print $1 - (1 / 3)}')")
     fi
 
-    # Mathematical conversions for HSL values to RGB
-    # base = lightness * 2 - saturation
-    local base="$((l * 2 - s))"
-    # max = ((lightness *2 - saturation) + saturation) * 2
-    local max="$(((base + s) * 2))"
-    # multiply hue by six to use for calculation of rgb
-    local h6=$((h * 6))
+    r="$(printf "%.0f" "$(echo "scale=4; $r * 255" | bc -l)")"
+    g="$(printf "%.0f" "$(echo "scale=4; $g * 255" | bc -l)")"
+    b="$(printf "%.0f" "$(echo "scale=4; $b * 255" | bc -l)")"
+    echo "$r $g $b $a"
 
-    # r,g,b are determined based off of h6 value,
-    # if h6 is less than value (1, 2, or 3)
-    # then h6 becomes either base or remains the same value
-    # it then compares to further incrementing values  maxing out at $l
-    local r=$((h6 < 1 ? base : h6 < 3 ? max : h6 < 4 ? base : $l))
-    local g=$((h6 < 2 ? base : h6 < 4 ? max : h6 < 5 ? base : $l))
-    local b=$((h6 < 3 ? base : h6 < 5 ? max : h6 < 6 ? base : $l))
-
-    # we are then presented with the resulting rgb values...
-    echo "$r $g $b"
 }
 
 main() {
@@ -352,7 +382,10 @@ main() {
                     hexval=$(parse_hsl_to_hex "$@")
                     printf "%s\n" "$hexval"
 
-                # elif [[ "$2" == "rgb" ]]; then
+                elif [[ "$2" == "rgb" ]]; then
+                    local hslval
+                    hslval=$(parse_hsl_to_rgb "$@")
+                    printf "%s\n" "$hslval"
                 fi
                 # if [[ "$2" == "rgb" ]]; then
                     # hsl_to_rgb "$@"
