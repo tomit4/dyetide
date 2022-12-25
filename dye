@@ -274,7 +274,8 @@ hue_to_rgb() {
 
     if [[ $(echo "$t < 0" | bc -l) -eq "1" ]]; then
         t=$(echo "scale=2; $t + 1" | bc -l)
-    elif [[ $(echo "$t > 1" | bc -l) -eq "1" ]]; then
+    fi
+    if [[ $(echo "$t > 1" | bc -l) -eq "1" ]]; then
         t=$(echo "scale=2; $t - 1" | bc -l)
     fi
 
