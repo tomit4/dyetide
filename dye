@@ -65,7 +65,8 @@ parse_args() {
             elif [[ $color_to_conv == "hsl" ]]; then
                 rgb_to_hsl  "${rgb[$"0"]}" "${rgb[$"1"]}" "${rgb[$"2"]}" "${rgb[$"3"]}"
             fi
-        error "$passed_color_code is not a recognized rgba code"
+        else
+            error "$passed_color_code is not a recognized rgba code"
         fi
 
     fi
@@ -110,21 +111,16 @@ dec_to_float() {
 }
 
 find_min_max() {
-   local r=$1
-   local g=$2
-   local b=$3
-   min=$r
-   max=$r
-   if [[ $(echo "$g > $max" | bc -l) -eq 1 ]]; then
-       max=$g
-   elif [[ $(echo "$g < $min" | bc -l) -eq 1 ]]; then
-       min=$g
-   fi
-   if [[ $(echo "$b > $max" | bc -l) -eq 1 ]]; then
-       max=$b
-   elif [[ $(echo "$b < $min" | bc -l) -eq 1 ]]; then
-       min=$b
-   fi
+    max=$1
+    min=$1
+    for arg in "$@"
+    do
+        if (( "$(echo "$arg $max" | awk '{print ($1 > $2)}')" )); then
+            max=$(echo "$arg" | awk '{print $1}')
+        elif (( "$(echo "$arg $min)" | awk '{print ($1 < $2)}')" )); then
+            min=$(echo "$arg" | awk '{print $1}')
+        fi
+    done
 }
 
 calculate_saturation() {
@@ -201,54 +197,70 @@ rgb_to_hex() {
     fi
 }
 
-# runtime error here, enter standard 'dye -r hsl "rgb(255, 255, 255)"'
-# strange bug, 'dye -r hsl "rgb(255, 255, 254)" works just fine for some reason...'
 rgb_to_hsl() {
     r=$(echo "scale=2; $1 / 255" | bc -l)
     g=$(echo "scale=2; $2 / 255" | bc -l)
     b=$(echo "scale=2; $3 / 255" | bc -l)
 
-    local a
-    if [[ -n "$4" ]]; then
-        a="$4"
+    find_min_max "$r" "$g" "$b"
+
+    h=$(echo "scale=2; ($max + $min) / 2" | bc -l)
+    s=$(echo "scale=2; ($max + $min) / 2" | bc -l)
+    l=$(echo "scale=2; ($max + $min) / 2" | bc -l)
+
+    if (( $(echo "$min $max" | awk '{print ($1 == $2)}') )); then
+        h=0
+        s=0
+        l="$(echo "scale=0; $max + $min" | bc -l)"
     else
-        a=""
+        #calculate difference between max and min
+        d="$(echo "scale=2; $max - $min" | bc -l)"
+
+        # calculate hue
+        if (( $(echo "$max $r" | awk '{print ($1 == $2)}') )); then
+            h=$(echo "scale=2; ($g - $b) / $d" | bc -l)
+            if (( $(echo "$g $b" | awk '{print ($1 < $2)}') )); then
+                h=$(echo "scale=2; $h + 6" | bc -l)
+            fi
+        elif (( $(echo "$max $g" | awk '{print ($1 == $2)}') )); then
+            h=$(echo "scale=2; ($b - $r) / $d + 2" | bc -l)
+        else
+            h=$(echo "scale=2; ($r - $g) / $d + 4" | bc -l)
+        fi
+
+        h=$(echo "scale=2; $h / 6" | bc -l)
+
+        # calculate saturation
+        if (( $(echo "$l 0.5" | awk '{print ($1 > $2)}') )); then
+            s=$(echo "scale=2; $d / (2 - $max - $min)" | bc -l)
+        else
+            s=$(echo "scale=2; $d / ($max + $min)" | bc -l)
+        fi
+
+        # calculate lightness
+        l=$(echo "scale=2; ($max + $min) / 2" | bc -l)
     fi
+
+    # convert back to 360 color wheel values
+    h=$(printf "%.0f" "$(echo "$h * 360" | bc -l)")
+    s=$(printf "%.0f" "$(echo "$s * 100" | bc -l)")
+    l=$(printf "%.0f" "$(echo "$l * 100" | bc -l)")
 
     # if a fourth arg is provided (alpha channel)
     if [[ -n "$4" ]]; then
-        a=$4
+        a="$4"
         if [[ $(echo "scale=2; $a > 1" | bc -l) -eq 1 ]]; then
             error "alpha channel cannot be greater than 1.0"
         fi
-    fi
-
-    find_min_max "$r" "$g" "$b"
-
-    if [[ $(echo "$max == $r" | bc -l) -eq 1 ]]; then
-        h=$(echo "(($g - $b) / ($max - $min))" | bc -l)
-    elif [[ $(echo "$max == $g" | bc -l) -eq 1 ]]; then
-        h=$(echo "(($b - $r) / ($max - $min)) + 2" | bc -l)
     else
-        h=$(echo "(($r - $g) / ($max - $min)) + 4" | bc -l)
+        a=""
     fi
-
-    s=$(echo "(($max - $min) / (1 - $min))" | bc -l)
-    l=$(echo "(($max + $min) / 2)" | bc -l)
-
-    h=$(printf "%.0f" "$(echo "($h * 60)" | bc -l)")
-    if [[ $(echo "$h < 0" | bc -l) -eq 1 ]]; then
-        h=$(printf "%.0f" "$(echo "$h +360" | bc -l)")
-    fi
-    s=$(printf "%.0f" "$(echo "($s * 100)" | bc -l)")
-    l=$(printf "%0.f" "$(echo "($l * 100)" | bc -l)")
 
     if [[ -n "$a" ]]; then
         printf "%s\n" "hsla($h, $s, $l, $a)"
     else
         printf "%s\n" "hsla($h, $s, $l)"
     fi
-
 }
 
 hue_to_rgb() {
