@@ -323,7 +323,7 @@ hsl_to_rgb() {
         exit 0
     else
         local q p
-        if [[ "$l" < .50 ]]; then
+        if [[ "$l" -lt .50 ]]; then
             q=$(echo "scale=6; $l * (100 + $s)" | bc -l)
         else
             q=$(echo "scale=6; $l + $s - $l * $s" | bc -l)
