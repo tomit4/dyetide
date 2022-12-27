@@ -43,12 +43,38 @@ replace_all_hex() {
             hexvalues+=("$x")
         done < <(printf "%s\0" "${allhexvalues[@]}" | sort -uz)
 
+        # not DRY at all, I know... I couldn't figure out how to make sure to
+        # process the lengths of the hex code first (longest always gets
+        # processed first). i tried a .length
+        # sort on the hexvalues() array from stackoverflow (see link at bottom)
         for hex in "${hexvalues[@]}"; do
-            rgb=$(dye -x rgb "$hex")
-            sed -i "s/ ${hex} / ${rgb} /g" "$filename"
-            sed -i "s/${hex} /${rgb} /g" "$filename"
-            sed -i "s/ ${hex};/ ${rgb};/g" "$filename"
-            sed -i "s/${hex}/${rgb}/g" "$filename"
+            if [[ ${#hex} -eq 9 ]]; then
+                rgb=$(dye -x rgb "$hex")
+                sed -i "s/ ${hex} / ${rgb} /g" "$filename"
+                sed -i "s/${hex} /${rgb} /g" "$filename"
+                sed -i "s/ ${hex};/ ${rgb};/g" "$filename"
+                sed -i "s/${hex}/${rgb}/g" "$filename"
+            fi
+        done
+
+        for hex in "${hexvalues[@]}"; do
+            if [[ ${#hex} -eq 7 ]]; then
+                rgb=$(dye -x rgb "$hex")
+                sed -i "s/ ${hex} / ${rgb} /g" "$filename"
+                sed -i "s/${hex} /${rgb} /g" "$filename"
+                sed -i "s/ ${hex};/ ${rgb};/g" "$filename"
+                sed -i "s/${hex}/${rgb}/g" "$filename"
+            fi
+        done
+
+        for hex in "${hexvalues[@]}"; do
+            if [[ ${#hex} -eq 4 ]]; then
+                rgb=$(dye -x rgb "$hex")
+                sed -i "s/ ${hex} / ${rgb} /g" "$filename"
+                sed -i "s/${hex} /${rgb} /g" "$filename"
+                sed -i "s/ ${hex};/ ${rgb};/g" "$filename"
+                sed -i "s/${hex}/${rgb}/g" "$filename"
+            fi
         done
 
         success "${filename}'s hex codes converted to rgba"
@@ -109,3 +135,5 @@ main() {
 }
 
 main "$@"
+
+# https://unix.stackexchange.com/questions/482393/bash-sort-array-according-to-length-of-elements
