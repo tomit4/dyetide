@@ -182,5 +182,3 @@ main() {
 }
 
 main "$@"
-
-# https://unix.stackexchange.com/questions/482393/bash-sort-array-according-to-length-of-elements
