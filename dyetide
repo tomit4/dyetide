@@ -26,7 +26,7 @@ success() {
 
 replace_all_hex() {
     local filename
-    filename="${2}"
+    filename="${3}"
     if [[ -f "$filename" ]]; then
         local rgb regex
         local allhexvalues hexvalues=()
@@ -59,7 +59,7 @@ replace_all_hex() {
 
 replace_all_rgb() {
     local filename
-    filename="${2}"
+    filename="${3}"
     if [[ -f "$filename" ]]; then
         local allrgbvalues rgbvalues rgbarr
         IFS=$'\n'
