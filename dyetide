@@ -156,7 +156,7 @@ replace_all_hsl() {
             rgb=$(dye -h rgb "$hsl")
             sed -i "s/${hsl}\([^0-9]\|$\)/ ${rgb}\1/g" "$filename"
         done
-        success "${filename}'s rgba codes converted to hsl"
+        success "${filename}'s hsl codes converted to rgb"
     fi
 }
 
