@@ -73,7 +73,7 @@ find_min_max() {
 calculate_saturation() {
     local min=$1
     local max=$2
-    l=$3
+    local l=$3
     # if rgb all have same values, then color is grey and saturation is 0
     if [[ $(echo "$max == $min" | bc -l) -eq 1 ]]; then
         printf "%.0f" 0
