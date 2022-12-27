@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # set -vx
-# set x
+# set -x
 
 printhelp() {
     cat <<EOM
@@ -307,9 +307,9 @@ hsl_to_rgb() {
     l="$((($3 > 100 ? 100 : $3 < 0 ? 0 : $3)))"
 
     # convert all values to between 0 - 1
-    h=$(echo "scale=; $1 / 360" | bc -l)
-    s=$(echo "scale=; $2 / 100" | bc -l)
-    l=$(echo "scale=; $3 / 100" | bc -l)
+    h=$(echo "scale=6; $1 / 360" | bc -l)
+    s=$(echo "scale=6; $2 / 100" | bc -l)
+    l=$(echo "scale=6; $3 / 100" | bc -l)
 
     # if a fourth arg is provided (alpha channel)
     if [[ -n "$4" ]]; then

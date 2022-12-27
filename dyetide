@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # set -vx
+# set -x
 
 printhelp() {
     cat <<EOM
@@ -105,7 +106,7 @@ replace_all_rgb() {
         success "${filename}'s rgba codes converted to hex"
     elif [[ "$passed_color_code" == "hsl" ]]; then
         for rgb in "${rgbvalues[@]}"; do
-            local hex
+            local hsl
             hsl=$(dye -r hsl "$rgb")
             sed -i "s/${rgb}\([^0-9]\|$\)/ ${hsl}\1/g" "$filename"
         done
@@ -113,8 +114,51 @@ replace_all_rgb() {
     fi
 }
 
-# replace_all_rgb() {
-# }
+replace_all_hsl() {
+    local filename allhslvalues hslvalues hslarr
+    local passed_color_code="$2"
+    filename="${3}"
+    local accepted_colors=( "hex" "rgb" )
+    local regex='\s?hsl[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}[)]|hsl[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}, [0-1]?.[0-9][0-9]?[)]\s?'
+    IFS=$'\n'
+
+    # check if passed color code exists in accepted_colors array
+    if [[ ! "${accepted_colors[*]}" =~ ${passed_color_code} ]]; then
+        error "$passed_color_code is not an accepted color format"
+    fi
+
+    if [[ ! -f "$filename" ]]; then
+        error "$filename not found"
+    fi
+
+    allhslvalues=$(grep -Po "${regex}" "${filename}")
+
+    read -d '' -r -a hslarr <<< "${allhslvalues}"
+
+    if [[ ${#hslarr[@]} -eq 0 ]]; then
+        error "no hsl values found in $filename"
+    fi
+
+    while IFS= read -r -d '' x; do
+        hslvalues+=("$x")
+    done < <(printf "%s\0" "${hslarr[@]}" | sort -uz)
+
+    if [[ "$passed_color_code" == "hex" ]]; then
+        for hsl in "${hslvalues[@]}"; do
+            local hex
+            hex=$(dye -h hex "$hsl")
+            sed -i "s/${hsl}\([^0-9]\|$\)/ ${hex}\1/g" "$filename"
+        done
+        success "${filename}'s hsl codes converted to hex"
+    elif [[ "$passed_color_code" == "rgb" ]]; then
+        for hsl in "${hslvalues[@]}"; do
+            local rgb
+            rgb=$(dye -h rgb "$hsl")
+            sed -i "s/${hsl}\([^0-9]\|$\)/ ${rgb}\1/g" "$filename"
+        done
+        success "${filename}'s rgba codes converted to hsl"
+    fi
+}
 
 main() {
     [[ "$#" -lt 1 ]] && printhelp
@@ -127,9 +171,9 @@ main() {
             r)
                 replace_all_rgb "$@"
                 ;;
-            # h)
-                # replace_all_hsl "$@"
-                # ;;
+            h)
+                replace_all_hsl "$@"
+                ;;
             ?)
                 printhelp
                 ;;
