@@ -25,61 +25,101 @@ success() {
 }
 
 replace_all_hex() {
-    local filename
-    filename="${3}"
-    if [[ -f "$filename" ]]; then
-        local regex hexvalues=()
-        regex='#[0-9a-fA-F]{8}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}'
-        mapfile -t hexvalues < <(grep -P -o "${regex}" "${filename}" | sort -r -k1.1 | sort -u)
-        if [[ ${#hexvalues[@]} -eq 0 ]]; then
-            error "no hex values found in $filename"
-        fi
+    local filename rgb hsl
+    local hexvalues=()
+    local regex='#[0-9a-fA-F]{8}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}'
+    local passed_color_code="$2"
+    local filename="${3}"
+    local accepted_colors=( "rgb" "hsl" )
+
+    # check if passed color code exists in accepted_colors array
+    if [[ ! "${accepted_colors[*]}" =~ ${passed_color_code} ]]; then
+        error "$passed_color_code is not an accepted color format"
+    fi
+
+    if [[ ! -f "$filename" ]]; then
+        error "$filename not found"
+    fi
+
+    # create an array of all that pass the hex regex called hexvalues and sort
+    # them from longest length to shortest length (unique values only)
+    mapfile -t hexvalues < <(grep -P -o "${regex}" "${filename}" | sort -r -k1.1 | sort -u)
+
+    if [[ "${#hexvalues[@]}" -eq 0 ]]; then
+        error "no hex values found in $filename"
+    fi
+
+    # converts hex to rgb throughout entire file
+    if [[ "$passed_color_code" == "rgb" ]]; then
         for hex in "${hexvalues[@]}"; do
-            local rgb
             rgb=$(dye -x rgb "$hex")
             sed -i "s/${hex}\([^0-9a-fA-F]\|$\)/${rgb}\1/g" "$filename"
         done
         success "${filename}'s hex codes converted to rgba"
-    else
-        error "$filename not found"
+
+    # converts hex to hsl throughout entire file
+    elif [[ "$passed_color_code" == "hsl" ]]; then
+        for hex in "${hexvalues[@]}"; do
+            hsl=$(dye -x hsl "$hex")
+            sed -i "s/${hex}\([^0-9a-fA-F]\|$\)/${hsl}\1/g" "$filename"
+        done
+        success "${filename}'s hex codes converted to hsla"
     fi
 }
 
 replace_all_rgb() {
-    local filename
+    local filename allrgbvalues rgbvalues rgbarr
+    local passed_color_code="$2"
     filename="${3}"
-    if [[ -f "$filename" ]]; then
-        local allrgbvalues rgbvalues rgbarr
-        IFS=$'\n'
-        regex='\s?rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}[)]|rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}, [0-1]?.[0-9][0-9]?[)]\s?'
-        allrgbvalues=$(grep -Po "${regex}" "${filename}")
+    local accepted_colors=( "hex" "hsl" )
+    local regex='\s?rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}[)]|rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}, [0-1]?.[0-9][0-9]?[)]\s?'
+    IFS=$'\n'
 
-        read -d '' -r -a rgbarr <<< "${allrgbvalues}"
+    # check if passed color code exists in accepted_colors array
+    if [[ ! "${accepted_colors[*]}" =~ ${passed_color_code} ]]; then
+        error "$passed_color_code is not an accepted color format"
+    fi
 
-        if [[ ${#rgbarr[@]} -eq 0 ]]; then
-            error "no rgb values found in $filename"
-        fi
+    if [[ ! -f "$filename" ]]; then
+        error "$filename not found"
+    fi
 
-        while IFS= read -r -d '' x; do
-            rgbvalues+=("$x")
-        done < <(printf "%s\0" "${rgbarr[@]}" | sort -uz)
+    allrgbvalues=$(grep -Po "${regex}" "${filename}")
 
+    read -d '' -r -a rgbarr <<< "${allrgbvalues}"
+
+    if [[ ${#rgbarr[@]} -eq 0 ]]; then
+        error "no rgb values found in $filename"
+    fi
+
+    while IFS= read -r -d '' x; do
+        rgbvalues+=("$x")
+    done < <(printf "%s\0" "${rgbarr[@]}" | sort -uz)
+
+    if [[ "$passed_color_code" == "hex" ]]; then
         for rgb in "${rgbvalues[@]}"; do
             local hex
             hex=$(dye -r hex "$rgb")
             sed -i "s/${rgb}\([^0-9]\|$\)/ ${hex}\1/g" "$filename"
         done
-
         success "${filename}'s rgba codes converted to hex"
-    else
-        error "$filename not found"
+    elif [[ "$passed_color_code" == "hsl" ]]; then
+        for rgb in "${rgbvalues[@]}"; do
+            local hex
+            hsl=$(dye -r hsl "$rgb")
+            sed -i "s/${rgb}\([^0-9]\|$\)/ ${hsl}\1/g" "$filename"
+        done
+        success "${filename}'s rgba codes converted to hsl"
     fi
 }
+
+# replace_all_rgb() {
+# }
 
 main() {
     [[ "$#" -lt 1 ]] && printhelp
 
-    while getopts ":x:r:?" arg; do
+    while getopts ":x:r:h:?" arg; do
         case $arg in
             x)
                 replace_all_hex "$@"
@@ -87,6 +127,9 @@ main() {
             r)
                 replace_all_rgb "$@"
                 ;;
+            # h)
+                # replace_all_hsl "$@"
+                # ;;
             ?)
                 printhelp
                 ;;
