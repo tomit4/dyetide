@@ -28,55 +28,17 @@ replace_all_hex() {
     local filename
     filename="${3}"
     if [[ -f "$filename" ]]; then
-        local rgb regex
-        local allhexvalues hexvalues=()
+        local regex hexvalues=()
         regex='#[0-9a-fA-F]{8}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}'
-        # grabs all hex values in $filename and puts them in $allhexvalues
-        mapfile -t allhexvalues < <(grep -P -o "${regex}" "${filename}")
-
-        if [[ ${#allhexvalues[@]} -eq 0 ]]; then
+        mapfile -t hexvalues < <(grep -P -o "${regex}" "${filename}" | sort -r -k1.1 | sort -u)
+        if [[ ${#hexvalues[@]} -eq 0 ]]; then
             error "no hex values found in $filename"
         fi
-
-        # $hexvalues contains only unique hex values from $allhexvalues
-        while IFS= read -r -d '' x; do
-            hexvalues+=("$x")
-        done < <(printf "%s\0" "${allhexvalues[@]}" | sort -uz)
-
-        # not DRY at all, I know... I couldn't figure out how to make sure to
-        # process the lengths of the hex code first (longest always gets
-        # processed first). i tried a .length
-        # sort on the hexvalues() array from stackoverflow (see link at bottom)
         for hex in "${hexvalues[@]}"; do
-            if [[ ${#hex} -eq 9 ]]; then
-                rgb=$(dye -x rgb "$hex")
-                sed -i "s/ ${hex} / ${rgb} /g" "$filename"
-                sed -i "s/${hex} /${rgb} /g" "$filename"
-                sed -i "s/ ${hex};/ ${rgb};/g" "$filename"
-                sed -i "s/${hex}/${rgb}/g" "$filename"
-            fi
+            local rgb
+            rgb=$(dye -x rgb "$hex")
+            sed -i "s/${hex}\([^0-9a-fA-F]\|$\)/${rgb}\1/g" "$filename"
         done
-
-        for hex in "${hexvalues[@]}"; do
-            if [[ ${#hex} -eq 7 ]]; then
-                rgb=$(dye -x rgb "$hex")
-                sed -i "s/ ${hex} / ${rgb} /g" "$filename"
-                sed -i "s/${hex} /${rgb} /g" "$filename"
-                sed -i "s/ ${hex};/ ${rgb};/g" "$filename"
-                sed -i "s/${hex}/${rgb}/g" "$filename"
-            fi
-        done
-
-        for hex in "${hexvalues[@]}"; do
-            if [[ ${#hex} -eq 4 ]]; then
-                rgb=$(dye -x rgb "$hex")
-                sed -i "s/ ${hex} / ${rgb} /g" "$filename"
-                sed -i "s/${hex} /${rgb} /g" "$filename"
-                sed -i "s/ ${hex};/ ${rgb};/g" "$filename"
-                sed -i "s/${hex}/${rgb}/g" "$filename"
-            fi
-        done
-
         success "${filename}'s hex codes converted to rgba"
     else
         error "$filename not found"
@@ -103,11 +65,9 @@ replace_all_rgb() {
         done < <(printf "%s\0" "${rgbarr[@]}" | sort -uz)
 
         for rgb in "${rgbvalues[@]}"; do
+            local hex
             hex=$(dye -r hex "$rgb")
-            sed -i "s/ ${rgb} / ${hex} /g" "$filename"
-            sed -i "s/${rgb} /${hex} /g" "$filename"
-            sed -i "s/ ${rgb};/ ${hex};/g" "$filename"
-            sed -i "s/${rgb}/${hex} /g" "$filename"
+            sed -i "s/${rgb}\([^0-9]\|$\)/ ${hex}\1/g" "$filename"
         done
 
         success "${filename}'s rgba codes converted to hex"
