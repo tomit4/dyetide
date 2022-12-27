@@ -171,14 +171,14 @@ function uninstall_manfile() {
 case "$0" in
     *uninstall*)
         dependencycheck $__elev rm
-        uninstall_binfile dyetide dye repaint
+        uninstall_binfile dyetide dye
         # uninstall_data
         # uninstall_manfile man1 dyetide.1.gz # repaint.1.gz ?
         ;;
     *)
         changeowner
-        dependencycheck $__elev chown cp chmod mkdir date awk sed rm find sort grep xclip
-        install_binfile dyetide dye repainter/repaint
+        dependencycheck $__elev chown cp chmod mkdir date awk sed rm find sort grep
+        install_binfile dyetide dye
         # install_data licenses headers repaint
         # install_manfile man1 man_page/*.1.gz
         ;;

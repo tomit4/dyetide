@@ -44,7 +44,7 @@ replace_all_hex() {
         done < <(printf "%s\0" "${allhexvalues[@]}" | sort -uz)
 
         for hex in "${hexvalues[@]}"; do
-            rgb=$(repaint -x "$hex")
+            rgb=$(dye -x rgb "$hex")
             sed -i "s/ ${hex} / ${rgb} /g" "$filename"
             sed -i "s/${hex} /${rgb} /g" "$filename"
             sed -i "s/ ${hex};/ ${rgb};/g" "$filename"
@@ -77,7 +77,7 @@ replace_all_rgb() {
         done < <(printf "%s\0" "${rgbarr[@]}" | sort -uz)
 
         for rgb in "${rgbvalues[@]}"; do
-            hex=$(repaint -r "$rgb")
+            hex=$(dye -r hex "$rgb")
             sed -i "s/ ${rgb} / ${hex} /g" "$filename"
             sed -i "s/${rgb} /${hex} /g" "$filename"
             sed -i "s/ ${rgb};/ ${hex};/g" "$filename"
