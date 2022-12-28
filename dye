@@ -301,15 +301,15 @@ hue_to_rgb() {
 hsl_to_rgb() {
     local h s l r g b
     # keep the hue within 0 - 360
-    h="$((($1 % 360 % 360) % 360))"
+    h="$(($1 % 360))"
     # keep the saturation between 0 -100
     s="$((($2 > 100 ? 100 : $2 < 0 ? 0 : $2)))"
     l="$((($3 > 100 ? 100 : $3 < 0 ? 0 : $3)))"
 
     # convert all values to between 0 - 1
-    h=$(echo "scale=6; $1 / 360" | bc -l)
-    s=$(echo "scale=6; $2 / 100" | bc -l)
-    l=$(echo "scale=6; $3 / 100" | bc -l)
+    h=$(echo "scale=6; $h / 360" | bc -l)
+    s=$(echo "scale=6; $s / 100" | bc -l)
+    l=$(echo "scale=6; $l / 100" | bc -l)
 
     # if a fourth arg is provided (alpha channel)
     if [[ -n "$4" ]]; then
