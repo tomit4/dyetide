@@ -78,7 +78,7 @@ calculate_saturation() {
     if [[ $(echo "$max == $min" | bc -l) -eq 1 ]]; then
         printf "%.0f" 0
     else
-        if [[ $(echo "$l < 0.5" | bc -l) -eq 1 ]]; then
+        if [[ $(echo "$l < 50" | bc -l) -eq 1 ]]; then
             printf "%.0f" "$(echo "scale=8; (($max - $min) / ($max + $min) * 100)" | bc -l)"
         else
             printf "%.0f" "$(echo "scale=8; (($max - $min) / (2 - $max - $min) * 100)" | bc -l)"
@@ -141,6 +141,7 @@ hex_to_rgb() {
 }
 
 # converted from Garry Tan's JS function (see credits)
+# unexpected #0004b7 to hsl(), expected hsl(239,100,36), got hsl(239,100,36)
 hex_to_hsl() {
     local a
     local hex=$3
@@ -168,6 +169,7 @@ hex_to_hsl() {
     find_min_max "$r" "$g" "$b"
 
     l=$(printf "%.0f" "$(echo "scale=8; (($max + $min) / 2 * 100)" | bc -l)")
+    # error here
     s=$(calculate_saturation "$min" "$max" "$l")
     h=$(calculate_hue "$min" "$max")
 
