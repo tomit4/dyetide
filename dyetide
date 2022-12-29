@@ -73,7 +73,7 @@ replace_all_rgb() {
     local passed_color_code="$2"
     filename="${3}"
     local accepted_colors=( "hex" "hsl" )
-    local regex='\s?rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}[)]|rgb[a]?[(][0-9]{1,3}, [0-9]{1,3}, [0-9]{1,3}, [0-1]?.[0-9][0-9]?[)]\s?'
+    local regex='\s*rgb[a]?[(][^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}[)]|rgb[a]?[(][^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}, [^"]*[0-1]?.[0-9][0-9]?[)]\s*'
     IFS=$'\n'
 
     # check if passed color code exists in accepted_colors array
@@ -119,7 +119,7 @@ replace_all_hsl() {
     local passed_color_code="$2"
     filename="${3}"
     local accepted_colors=( "hex" "rgb" )
-    local regex='\s?hsl[a]?[(][0-9]{1,3}, [0-9]{1,3}%, [0-9]{1,3}%[)]|hsl[a]?[(][0-9]{1,3}, [0-9]{1,3}%, [0-9]{1,3}%, [0-1]?.[0-9][0-9]?[)]\s?'
+    local regex='\s*hsl[a]?[(][^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}%, [^*][0-9]{1,3}%[)]|hsl[a]?[(][^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}%, [^"]*[0-9]{1,3}%, [^"]*[0-1]?.[0-9][0-9]?[)]\s*'
     IFS=$'\n'
 
     # check if passed color code exists in accepted_colors array
