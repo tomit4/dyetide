@@ -4,13 +4,23 @@
 
 printhelp() {
     cat <<EOM
-usage: dyetide [-x|-r] file
+usage: dyetide [-x|-r|-h] [hex|rgb|hsl] file
 options:
- -x             replace all hex with rgba in file
- -r             replace all rgb with hex in file
+ # -x [color_code]    convert all hex to [color_code] in file
+ # -r [color_code]    convert all rgb to [color_code] in file
+ # -h [color_code]    convert all hsl to [color_code] in file
 examples:
- dyetide -x file
- dyetide -r file
+ dyetide -x rgb file
+ dyetide -x hsl file
+ dyetide -r hex file
+ dyetide -r hsl file
+ dyetide -h hex file
+ dyetide -h rgb file
+WARNING:
+ dyetide will overwrite the existing file you utilize this on!
+ while dyetide has been tested, there is always a chance
+ this script could create unexpected or undesirable results.
+ be sure to make a backup file before utilizing this script.
 EOM
     exit 0
 }
