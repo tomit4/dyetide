@@ -16,11 +16,10 @@ examples:
  dyetide -r hsl file
  dyetide -h hex file
  dyetide -h rgb file
-WARNING:
- dyetide will overwrite the existing file you utilize this on!
- while dyetide has been tested, there is always a chance
- this script could create unexpected or undesirable results.
- be sure to make a backup file before utilizing this script.
+note:
+ dyetide overwrites all specified color codes on the file you
+ pass it directly. after execution, dyetide will create a .bak
+ file in case an undesirable change occurs.
 EOM
     exit 0
 }
@@ -59,6 +58,9 @@ replace_all_hex() {
     if [[ "${#hexvalues[@]}" -eq 0 ]]; then
         error "no hex values found in $filename"
     fi
+
+    #create backup of file prior to changing color codes
+    cp "${filename}" "${filename}.bak"
 
     # converts hex to rgb throughout entire file
     if [[ "$passed_color_code" == "rgb" ]]; then
@@ -102,6 +104,9 @@ replace_all_rgb() {
     if [[ ${#rgbarr[@]} -eq 0 ]]; then
         error "no rgb values found in $filename"
     fi
+
+    #create backup of file prior to changing color codes
+    cp "${filename}" "${filename}.bak"
 
     while IFS= read -r -d '' x; do
         rgbvalues+=("$x")
@@ -148,6 +153,9 @@ replace_all_hsl() {
     if [[ ${#hslarr[@]} -eq 0 ]]; then
         error "no hsl values found in $filename"
     fi
+
+    #create backup of file prior to changing color codes
+    cp "${filename}" "${filename}.bak"
 
     while IFS= read -r -d '' x; do
         hslvalues+=("$x")
