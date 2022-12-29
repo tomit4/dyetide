@@ -34,6 +34,10 @@ success() {
     exit 0
 }
 
+backup() {
+    cp "${1}" "${1}.bak"
+}
+
 replace_all_hex() {
     local filename rgb hsl
     local hexvalues=()
@@ -59,8 +63,7 @@ replace_all_hex() {
         error "no hex values found in $filename"
     fi
 
-    #create backup of file prior to changing color codes
-    cp "${filename}" "${filename}.bak"
+    backup "${filename}"
 
     # converts hex to rgb throughout entire file
     if [[ "$passed_color_code" == "rgb" ]]; then
@@ -105,8 +108,7 @@ replace_all_rgb() {
         error "no rgb values found in $filename"
     fi
 
-    #create backup of file prior to changing color codes
-    cp "${filename}" "${filename}.bak"
+    backup "${filename}"
 
     while IFS= read -r -d '' x; do
         rgbvalues+=("$x")
@@ -154,8 +156,7 @@ replace_all_hsl() {
         error "no hsl values found in $filename"
     fi
 
-    #create backup of file prior to changing color codes
-    cp "${filename}" "${filename}.bak"
+    backup "${filename}"
 
     while IFS= read -r -d '' x; do
         hslvalues+=("$x")
