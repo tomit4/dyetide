@@ -6,9 +6,9 @@ printhelp() {
     cat <<EOM
 usage: dyetide [-x|-r|-h] [hex|rgb|hsl] file
 options:
- # -x [color_code]    convert all hex to [color_code] in file
- # -r [color_code]    convert all rgb to [color_code] in file
- # -h [color_code]    convert all hsl to [color_code] in file
+ -x [color_code]    convert all hex to [color_code] in file
+ -r [color_code]    convert all rgb to [color_code] in file
+ -h [color_code]    convert all hsl to [color_code] in file
 examples:
  dyetide -x rgb file
  dyetide -x hsl file
