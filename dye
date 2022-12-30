@@ -57,8 +57,8 @@ dec_to_float() {
 
 # for use in hex_to_hsl and rgb_to_hsl
 find_min_max() {
-    max=$1
-    min=$1
+    local max=$1
+    local min=$1
     for arg in "$@"
     do
         if [[ "$(echo "$arg > $max" | bc -l)" -eq 1 ]]; then
@@ -67,6 +67,8 @@ find_min_max() {
             min=$arg
         fi
     done
+
+    echo "$min $max"
 }
 
 # for use in hex_to_hsl
@@ -168,8 +170,7 @@ hex_to_hsl() {
     g=$(dec_to_float "$g")
     b=$(dec_to_float "$b")
 
-    # returns global values for $min and $max based off of rgb values
-    find_min_max "$r" "$g" "$b"
+    find_min_max "$r" "$g" "$b" | read min max
 
     # lightness is calculated as a percentage between max and min values of rgb
     l=$(printf "%.0f" "$(echo "scale=8; (($max + $min) / 2 * 100)" | bc -l)")
@@ -212,7 +213,7 @@ rgb_to_hsl() {
     g=$(dec_to_float "$2")
     b=$(dec_to_float "$3")
 
-    find_min_max "$r" "$g" "$b"
+    find_min_max "$r" "$g" "$b" | read min max
 
     # initial hue/saturation/lightness values are equivalent to $min+$max/2
     h=$(echo "scale=8; ($max + $min) / 2" | bc -l)
