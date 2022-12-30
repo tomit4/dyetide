@@ -387,13 +387,15 @@ hsl_to_rgb() {
     fi
 }
 
-#since i have these already...
+# since i have these already...
+# and since hsl needs to be converted to rgb before hex almost inherently...
 hsl_to_hex() {
     rgb_code="$(hsl_to_rgb "$@")"
     parse_args "-r" "hex" "$rgb_code"
 }
 
 # parses out either rgb() or hsl() color strings into numeric values
+# then passes them to the appropriate color conversion functions
 parse_args() {
     local orig_color=$1
     local color_to_conv=$2
