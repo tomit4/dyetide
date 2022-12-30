@@ -78,8 +78,11 @@ calculate_saturation() {
     if [[ $(echo "$max == $min" | bc -l) -eq 1 ]]; then
         printf "%.0f" 0
     else
+        # if value (lightness) is less than 50%, then lightness is a percentage determined
+        # based off of $max and $min
         if [[ $(echo "$l < 50" | bc -l) -eq 1 ]]; then
             printf "%.0f" "$(echo "scale=8; (($max - $min) / ($max + $min) * 100)" | bc -l)"
+        # else a subtractive calculation is used using $max and $min to determine percentage
         else
             printf "%.0f" "$(echo "scale=8; (($max - $min) / (2 - $max - $min) * 100)" | bc -l)"
         fi
@@ -95,7 +98,7 @@ calculate_hue() {
         printf "%.0f" 0
     else
         # determines which of r,g,b is predominant color and reallocates hue
-        # degree number based off of it (better implemented in )
+        # degree number based off of it
         if [[ $(echo "$r == $max" | bc -l) -eq 1 ]]; then
             printf "%.0f" "$(echo "scale=8; 60 * (($g - $b) / ($max - $min))" | bc -l)"
         elif [[ $(echo "$g == $max" | bc -l) -eq 1 ]]; then
@@ -141,7 +144,6 @@ hex_to_rgb() {
 }
 
 # converted from Garry Tan's JS function (see credits)
-# unexpected #0004b7 to hsl(), expected hsl(239,100,36), got hsl(239,100,36)
 hex_to_hsl() {
     local a
     local hex=$3
@@ -166,13 +168,17 @@ hex_to_hsl() {
     g=$(dec_to_float "$g")
     b=$(dec_to_float "$b")
 
+    # returns global values for $min and $max based off of rgb values
     find_min_max "$r" "$g" "$b"
 
+    # lightness is calculated as a percentage between max and min values of rgb
     l=$(printf "%.0f" "$(echo "scale=8; (($max + $min) / 2 * 100)" | bc -l)")
-    # error here
+    # saturation is then calculated based off of $min/$max/$l values
     s=$(calculate_saturation "$min" "$max" "$l")
+    # hue is calculated based off of $min/$max values
     h=$(calculate_hue "$min" "$max")
 
+    # h is added 360 degrees if a negative value is passed
     if [[ $(echo "$h < 0" | bc -l) -eq 1 ]]; then
         h=$(echo "scale=8; $h + 360" | bc -l)
     fi
@@ -208,10 +214,13 @@ rgb_to_hsl() {
 
     find_min_max "$r" "$g" "$b"
 
+    # initial hue/saturation/lightness values are equivalent to $min+$max/2
     h=$(echo "scale=8; ($max + $min) / 2" | bc -l)
     s=$(echo "scale=8; ($max + $min) / 2" | bc -l)
     l=$(echo "scale=8; ($max + $min) / 2" | bc -l)
 
+    # if $min and $max are equal,, then color is greyscale, and only lightness
+    # value is needed
     if (( $(echo "$min $max" | awk '{print ($1 == $2)}') )); then
         h=0
         s=0
@@ -221,13 +230,17 @@ rgb_to_hsl() {
         d="$(echo "scale=8; $max - $min" | bc -l)"
 
         # calculate hue (not the same as calculate_hue func in hex_to_hsl)
+        # if red is predominant hue in find_min_max
         if (( $(echo "$max $r" | awk '{print ($1 == $2)}') )); then
             h=$(echo "scale=8; ($g - $b) / $d" | bc -l)
+            # then if g is less than b
             if (( $(echo "$g $b" | awk '{print ($1 < $2)}') )); then
                 h=$(echo "scale=8; $h + 6" | bc -l)
             fi
+        # if green is predominant hue in find_min_max
         elif (( $(echo "$max $g" | awk '{print ($1 == $2)}') )); then
             h=$(echo "scale=8; ($b - $r) / $d + 2" | bc -l)
+        # if blue is predominant hue in find_min_max
         else
             h=$(echo "scale=8; ($r - $g) / $d + 4" | bc -l)
         fi
