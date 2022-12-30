@@ -56,15 +56,16 @@ dec_to_float() {
 }
 
 # for use in hex_to_hsl and rgb_to_hsl
+
 find_min_max() {
     max=$1
     min=$1
     for arg in "$@"
     do
-        if (( "$(echo "$arg $max" | awk '{print ($1 > $2)}')" )); then
-            max=$(echo "$arg" | awk '{print $1}')
-        elif (( "$(echo "$arg $min)" | awk '{print ($1 < $2)}')" )); then
-            min=$(echo "$arg" | awk '{print $1}')
+        if [[ "$(echo "$arg > $max" | bc -l)" -eq 1 ]]; then
+            max=$arg
+        elif [[ "$(echo "$arg < $max" | bc -l)" -eq 1 ]]; then
+            min=$arg
         fi
     done
 }
