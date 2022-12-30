@@ -12,5 +12,5 @@ to know what a hex/rgba/hsla code is in another color code right now!__
 - [x] Create installation script based off of upnup's installation script.
 - [x] Integrate hsl/hsla color conversion into dye and dyetide
 - [x] Create man page for project.
-- [ ] Refactor Codebase, clean up
+- [x] Refactor Codebase, clean up
 - [ ] Create gif or asciiden demonstrationg basic usage.
