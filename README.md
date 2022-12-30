@@ -106,3 +106,9 @@ redditor ProfessorChaos112 - provided an [alternative](https://reddit.com/r/bash
 redditor DyslexicHobo -suggested OpenAI's ChatGPT, which was utilized to finalize rgb_to_hex()
 
 artificial intelligence [ChatGPT](https://openai.com/blog/chatgpt/)
+
+### Checklist
+
+- [ ] Add documentation comments to dyetide code
+- [ ] Try and refactor sed chains when extracting numbers from rgba/hsla strings
+in dye
