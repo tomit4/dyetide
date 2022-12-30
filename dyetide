@@ -75,7 +75,6 @@ replace_all_hex() {
     local regex='#[0-9a-fA-F]{8}|#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}'
     local passed_color_code="$2"
     local filename="${3}"
-    local accepted_colors=( "rgb" "hsl" )
 
     check_valid_color "$passed_color_code" rgb hsl
     check_valid_file "$filename"
@@ -153,7 +152,6 @@ replace_all_hsl() {
     local filename allhslvalues hslvalues hslarr
     local passed_color_code="$2"
     filename="${3}"
-    # local accepted_colors=( "hex" "rgb" )
     local regex='\s*hsl[a]?[(][^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}%, [^*][0-9]{1,3}%[)]|hsl[a]?[(][^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}%, [^"]*[0-9]{1,3}%, [^"]*[0-1]?.[0-9][0-9]?[)]\s*'
     IFS=$'\n'
 
