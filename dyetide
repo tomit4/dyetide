@@ -24,21 +24,50 @@ EOM
     exit 0
 }
 
+########################
+# HELPER FUNCTIONS
+########################
+
+# simple error alias function (see credits below)
 error() {
     printf "error: %s\n" "$1" 1>&2
     exit 1
 }
 
+# simple success alias function
 success() {
     printf "success: %s\n" "$1" 2>&1
     exit 0
 }
 
+# backs up original file if .bak file doesn't already exist
 backup() {
-    if [[ ! -f "$1.bak" ]]; then
-        cp "$1" "$1.bak"
+    local filename="$1"
+    if [[ ! -f "$filename.bak" ]]; then
+        cp "$filename" "$filename.bak"
     fi
 }
+
+check_valid_color() {
+    local passed_color_code="$1"
+    shift
+    local accepted_colors=("$@")
+
+    if [[ ! "${accepted_colors[*]}" =~ ${passed_color_code} ]]; then
+        error "$passed_color_code is not an accepted color format"
+    fi
+}
+
+check_valid_file() {
+    local filename="$1"
+    if [[ ! -f "$filename" ]]; then
+        error "$filename not found"
+    fi
+}
+
+############################
+# COLOR CONVERSION FUNCTIONS
+############################
 
 replace_all_hex() {
     local filename rgb hsl
@@ -48,14 +77,8 @@ replace_all_hex() {
     local filename="${3}"
     local accepted_colors=( "rgb" "hsl" )
 
-    # check if passed color code exists in accepted_colors array
-    if [[ ! "${accepted_colors[*]}" =~ ${passed_color_code} ]]; then
-        error "$passed_color_code is not an accepted color format"
-    fi
-
-    if [[ ! -f "$filename" ]]; then
-        error "$filename not found"
-    fi
+    check_valid_color "$passed_color_code" rgb hsl
+    check_valid_file "$filename"
 
     # create an array of all that pass the hex regex called hexvalues and sort
     # them from longest length to shortest length (unique values only)
@@ -89,18 +112,11 @@ replace_all_rgb() {
     local filename allrgbvalues rgbvalues rgbarr
     local passed_color_code="$2"
     filename="${3}"
-    local accepted_colors=( "hex" "hsl" )
     local regex='\s*rgb[a]?[(][^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}[)]|rgb[a]?[(][^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}, [^"]*[0-1]?.[0-9][0-9]?[)]\s*'
     IFS=$'\n'
 
-    # check if passed color code exists in accepted_colors array
-    if [[ ! "${accepted_colors[*]}" =~ ${passed_color_code} ]]; then
-        error "$passed_color_code is not an accepted color format"
-    fi
-
-    if [[ ! -f "$filename" ]]; then
-        error "$filename not found"
-    fi
+    check_valid_color "$passed_color_code" hex hsl
+    check_valid_file "$filename"
 
     allrgbvalues=$(grep -Po "${regex}" "${filename}")
 
@@ -137,18 +153,12 @@ replace_all_hsl() {
     local filename allhslvalues hslvalues hslarr
     local passed_color_code="$2"
     filename="${3}"
-    local accepted_colors=( "hex" "rgb" )
+    # local accepted_colors=( "hex" "rgb" )
     local regex='\s*hsl[a]?[(][^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}%, [^*][0-9]{1,3}%[)]|hsl[a]?[(][^"]*[0-9]{1,3}, [^"]*[0-9]{1,3}%, [^"]*[0-9]{1,3}%, [^"]*[0-1]?.[0-9][0-9]?[)]\s*'
     IFS=$'\n'
 
-    # check if passed color code exists in accepted_colors array
-    if [[ ! "${accepted_colors[*]}" =~ ${passed_color_code} ]]; then
-        error "$passed_color_code is not an accepted color format"
-    fi
-
-    if [[ ! -f "$filename" ]]; then
-        error "$filename not found"
-    fi
+    check_valid_color "$passed_color_code" hex rgb
+    check_valid_file "$filename"
 
     allhslvalues=$(grep -Po "${regex}" "${filename}")
 
@@ -181,6 +191,10 @@ replace_all_hsl() {
     fi
 }
 
+########################
+# MAIN ROUTINE
+########################
+#
 main() {
     [[ "$#" -lt 1 ]] && printhelp
 
