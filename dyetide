@@ -35,7 +35,9 @@ success() {
 }
 
 backup() {
-    cp "${1}" "${1}.bak"
+    if [[ ! -f "$1.bak" ]]; then
+        cp "$1" "$1.bak"
+    fi
 }
 
 replace_all_hex() {
