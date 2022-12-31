@@ -204,7 +204,7 @@ replace_all_hsl() {
 ########################
 # MAIN ROUTINE
 ########################
-#
+
 main() {
     [[ "$#" -lt 1 ]] && printhelp
 
