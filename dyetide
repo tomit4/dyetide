@@ -117,8 +117,10 @@ replace_all_rgb() {
     check_valid_color "$passed_color_code" hex hsl
     check_valid_file "$filename"
 
+    # grabs all rgb values from file
     allrgbvalues=$(grep -Po "${regex}" "${filename}")
 
+    # and stores them in a rgbarr array
     read -d '' -r -a rgbarr <<< "${allrgbvalues}"
 
     if [[ ${#rgbarr[@]} -eq 0 ]]; then
@@ -127,10 +129,13 @@ replace_all_rgb() {
 
     backup "${filename}"
 
+    # create an array of all that pass the rgb regex called rgbvalues and sort
+    # them from longest length to shortest length (unique values only)
     while IFS= read -r -d '' x; do
         rgbvalues+=("$x")
     done < <(printf "%s\0" "${rgbarr[@]}" | sort -uz)
 
+    # converts rgb to hex throughout entire file
     if [[ "$passed_color_code" == "hex" ]]; then
         for rgb in "${rgbvalues[@]}"; do
             local hex
@@ -138,6 +143,7 @@ replace_all_rgb() {
             sed -i "s/${rgb}\([^0-9]\|$\)/ ${hex}\1/g" "$filename"
         done
         success "${filename}'s rgba codes converted to hex"
+    # converts rgb to hsl throughout entire file
     elif [[ "$passed_color_code" == "hsl" ]]; then
         for rgb in "${rgbvalues[@]}"; do
             local hsl
@@ -158,8 +164,10 @@ replace_all_hsl() {
     check_valid_color "$passed_color_code" hex rgb
     check_valid_file "$filename"
 
+    # grabs all hsl values from file
     allhslvalues=$(grep -Po "${regex}" "${filename}")
 
+    # and stores them in a hslarr array
     read -d '' -r -a hslarr <<< "${allhslvalues}"
 
     if [[ ${#hslarr[@]} -eq 0 ]]; then
@@ -168,10 +176,13 @@ replace_all_hsl() {
 
     backup "${filename}"
 
+    # create an array of all that pass the hsl regex called hslvalues and sort
+    # them from longest length to shortest length (unique values only)
     while IFS= read -r -d '' x; do
         hslvalues+=("$x")
     done < <(printf "%s\0" "${hslarr[@]}" | sort -uz)
 
+    # converts hsl to hex throughout entire file
     if [[ "$passed_color_code" == "hex" ]]; then
         for hsl in "${hslvalues[@]}"; do
             local hex
@@ -179,6 +190,7 @@ replace_all_hsl() {
             sed -i "s/${hsl}\([^0-9]\|$\)/ ${hex}\1/g" "$filename"
         done
         success "${filename}'s hsl codes converted to hex"
+    # converts hsl to rgb throughout entire file
     elif [[ "$passed_color_code" == "rgb" ]]; then
         for hsl in "${hslvalues[@]}"; do
             local rgb

@@ -2,22 +2,27 @@
 
 __dyetide is a simple tool written in bash for converting your hex code to rgba
 codes... or visa versa! dyetide uses classic command line tools like grep, sed,
-awk, cut, and bc to parse through a file (usually css) and convert all hex code
-to rgba or rgba to hex code. Included is a standalone tool called dye, which is
-a separate command line tool for doing one at a time color conversions, for when
-you need to know what a hex/rgba/hsla code is in another color code right now!__
+awk, cut, and bc to parse through a file (usually css) and convert all color codes
+to other color codes. Included is a standalone tool called dye, in case you just
+need to convert one color at a time. Gone are the days where you have to consult your GUI color picker or some online color conversion tool! Now you can find out what you need to know from the terminal right now!__
 
 ### Installation/Uninstallation
 
-clone this repository and navigate into it:
+clone this repository and navigate into it (hosted on both github and codeberg):
+
+`git clone https://github.com/tomit4/dyetide`
+
+or
 
 `git clone https://codeberg.org/z3rOR0ne/dyetide`
 
+Then:
+
 `cd dyetide`
 
-this repository includes install/uninstall scripts for your convenience.
+This repository includes install/uninstall scripts for your convenience.
 
-By default, the script and data files are installed systemwide in `/usr/local` (requires root privilege).
+By default, the script and data files are installed system wide in `/usr/local` (requires root privilege).
 
 If you want to install to your home directory, use `./install --user` (no root required).
 
@@ -63,6 +68,8 @@ examples:
  dye -h hex "hsla(350, 100%, 100%, 1.0)"
  dye -h rgb "hsl(350, 100, 100)"
 ```
+There are also man pages available for both dye and dyetide, which provide
+further information on usage.
 
 ### Backups
 
@@ -99,16 +106,10 @@ Akash Mittal - [original code](https://akashmittal.com/code-example-convert-hex-
 
 Garry Tan, - [original code](https://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c) for hsl_to_rgb and rgb_to_hsl functions translated from JavaScript
 
-redditor zeekar - provided [explanations](https://reddit.com/r/bash/comments/zqmvz8/rgbhex_converter_syntax_how_does_this_work/) of Akash Mittal's original code
+Redditor zeekar - provided [explanations](https://reddit.com/r/bash/comments/zqmvz8/rgbhex_converter_syntax_how_does_this_work/) of Akash Mittal's original code
 
-redditor ProfessorChaos112 - provided an [alternative](https://reddit.com/r/bash/comments/zut4nw/converting_hsl_to_rgb_in_bash/) rgb_to_hsl function
+Redditor ProfessorChaos112 - provided an [alternative](https://reddit.com/r/bash/comments/zut4nw/converting_hsl_to_rgb_in_bash/) rgb_to_hsl function
 
-redditor DyslexicHobo -suggested OpenAI's ChatGPT, which was utilized to finalize rgb_to_hex()
+Redditor DyslexicHobo -suggested OpenAI's ChatGPT, which was utilized to finalize rgb_to_hex()
 
-artificial intelligence [ChatGPT](https://openai.com/blog/chatgpt/)
-
-### Checklist
-
-- [ ] Add documentation comments to dyetide code
-- [ ] Try and refactor sed chains when extracting numbers from rgba/hsla strings
-in dye
+OpenAI's artificial intelligence [ChatGPT](https://openai.com/blog/chatgpt/)

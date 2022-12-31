@@ -509,10 +509,10 @@ main "$@"
 # Garry Tan, who provided the JavaScript version of hsl_to_rgb
 # https://axonflux.com/handy-rgb-to-hsl-and-rgb-to-hsv-color-model-c
 
-# redditor zeekar who broke down what those functions did line by line:
+# Redditor zeekar who broke down what those functions did line by line:
 # https://reddit.com/r/bash/comments/zqmvz8/rgbhex_converter_syntax_how_does_this_work/
 
-# redditor ProfessorChaos112 who provided an alternative rgb_to_hsl function,
+# Redditor ProfessorChaos112 who provided an alternative rgb_to_hsl function,
 # although not implemented here, it provided more checks and balances for hue
 # degree determination
 # https://reddit.com/r/bash/comments/zut4nw/converting_hsl_to_rgb_in_bash/
@@ -520,6 +520,6 @@ main "$@"
 # tomocafe on github provided the error handling function and install script
 # https://github.com/tomocafe
 
-# redditor DyslexicHobo, who suggested ChatGPT, which I used to finalize the
+# Redditor DyslexicHobo, who suggested ChatGPT, which I used to finalize the
 # rgb_to_hex() function. Thank you AI overlords!
 # https://openai.com/blog/chatgpt/
