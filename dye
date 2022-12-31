@@ -168,7 +168,7 @@ hex_to_hsl() {
     g=$(dec_to_float "$g")
     b=$(dec_to_float "$b")
 
-    find_min_max "$r" "$g" "$b" | read min max
+    find_min_max "$r" "$g" "$b"
 
     # lightness is calculated as a percentage between max and min values of rgb
     l=$(printf "%.0f" "$(echo "scale=8; (($max + $min) / 2 * 100)" | bc -l)")
